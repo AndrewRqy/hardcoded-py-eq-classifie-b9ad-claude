@@ -1,0 +1,44 @@
+idea:
+  title: Advanced hard-coded Python Classifier for Equation Theory
+  domain: mathematics
+  hypothesis: 'Replacing the BFS term rewriting and hill-climbing components of previous
+    hard-coded Python classifiers with Knuth-Bendix completion for positive implication
+    and SMT model finding (Z3) for negative implication will increase the soundness
+    and accuracy of implication classification over the entire raw implication graph
+    in equational theories of magmas.
+
+    '
+  background:
+    description: "The pilot task is equational implication over magmas: given Equation\
+      \ 1 and Equation 2, determine whether Equation 1 implies Equation 2. This challenge\
+      \ is based on the Equational Theories Project. A previous classifier (predictor3)\
+      \ extended predictor2 with BFS term rewriting, exhaustive size-3 magma enumeration,\
+      \ polynomial evaluation, and hill-climbing on magmas up to size 5, achieving\
+      \ 100% accuracy on random samples from the graph. Error analysis reveals two\
+      \ soundness gaps: (1) The BFS engine can spuriously \"prove\" a FALSE implication\
+      \ \u2014 reachable-term sets collide through deep rewrite chains, returning\
+      \ p = 0.9999 incorrectly. (2) Hill-climbing (sizes 3-5) misses counterexamples\
+      \ requiring larger magmas, leaving genuine non-implications undetected. The\
+      \ proposed fix replaces both with sound procedures: Knuth-Bendix (KB) completion\
+      \ for the positive path: converts E1 into a confluent terminating rewriting\
+      \ system and decides E1 |= E2 via normal forms \u2014 no false proofs possible.\
+      \ SMT model finding (Z3) for the negative path: searches for a counterexample\
+      \ magma of size n as a satisfiability query, complete for fixed n up to n =\
+      \ 10.\n"
+    code_references:
+    - repo: https://github.com/AndrewRqy/hardcoded-eq-implication-f0c0-claude
+      description: 'predictor3: Previous classifier with BFS term rewriting, magma
+        enumeration, polynomial evaluation, and hill-climbing.'
+    - repo: https://github.com/teorth/equational_theories/blob/main/scripts/predictor/predictor1.py
+      description: Example Python classifier for equational implication.
+    - repo: https://github.com/teorth/equational_theories/blob/main/scripts/predictor/predictor2.py
+      description: Example Python classifier for equational implication.
+  metadata:
+    author: Andrew Ren
+    source: IdeaHub
+    source_url: https://hypogenic.ai/ideahub/idea/0zd4ixdZptnQzSqq6UDW
+    idea_id: advanced_hard_coded_python_cla_20260423_231503_99b3cd9a
+    created_at: '2026-04-23T23:15:03.357587'
+    status: submitted
+    github_repo_name: hardcoded-py-eq-classifie-b9ad-claude
+    github_repo_url: https://github.com/AndrewRqy/hardcoded-py-eq-classifie-b9ad-claude
