@@ -1,0 +1,18 @@
+{
+  "predictor3": {
+    "accuracy": 1.0,
+    "avg_log_loss": -0.002113637900199278,
+    "false_positives": 0,
+    "false_negatives": 0
+  },
+  "predictor4": {
+    "accuracy": 1.0,
+    "avg_log_loss": -0.0025045002358054427,
+    "false_positives": 0,
+    "false_negatives": 0
+  },
+  "improvements": 0,
+  "regressions": 0,
+  "net_ll_improvement": -0.0781724671212329,
+  "n_test_cases": 200
+}

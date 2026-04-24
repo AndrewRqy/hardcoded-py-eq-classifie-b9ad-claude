@@ -1,0 +1,90 @@
+\section{Introduction}
+\label{sec:intro}
+
+Universal algebra studies classes of algebraic structures defined by equational
+laws: identities of the form $s = t$ where $s$ and $t$ are terms built from
+variables and operation symbols.  A fundamental question is the \emph{implication
+problem}: given equational laws $E$ and $E'$, does $E$ logically entail $E'$?
+That is, does every model of $E$ also satisfy $E'$?
+
+The \emph{Equational Theories Project} (ETP) \cite{etp2025} recently determined
+the complete implication relation among $4{,}694$ equational laws over a single
+binary operation $*$ (a \emph{magma}) of \emph{order at most four} (at most four
+applications of $*$), verifying each of the $22{,}028{,}942$ pairwise implication
+decisions with formal Lean~4 proofs.  This dataset provides a unique benchmark:
+a complete, machine-verified ground truth against which any automated implication
+classifier can be tested.
+
+\para{The classification problem.}
+A practical implication classifier must be both \emph{sound} (it never asserts
+a false implication) and \emph{complete} (it never misses a true implication or
+counterexample).  Full decidability of the implication problem for unrestricted
+magma laws is known to be unattainable \cite{mckenzie1971spectra}; nonetheless,
+efficient heuristic and semi-decision procedures are valuable for interactive
+algebraic exploration and automated hypothesis testing.
+
+\para{Soundness gaps in prior classifiers.}
+The predecessor classifier \textsc{predictor3} employs two components that are
+either unsound or incomplete.  First, a bounded breadth-first reachability search
+serves as its positive implication test.  While sound in principle---a reachable
+term intersection genuinely witnesses an equational derivation---its bounded
+character means it can spuriously report an implication when deep rewrite chains
+cause the reachable-term sets to collide accidentally, without a true proof.
+Second, a heuristic hill-climbing search tests for counterexamples in magmas of
+sizes 4 and 5; because hill-climbing is not exhaustive, it may terminate without
+finding a genuine counterexample of those sizes.
+
+\para{Our approach.}
+We replace both unsound or incomplete components with established sound and
+complete procedures from the term rewriting and satisfiability literatures.
+
+For the \emph{positive path}, we implement Knuth-Bendix (KB) completion
+\cite{knuth1970simple} from scratch in Python.  When KB completion terminates
+with a convergent term rewriting system $R$, the normal-form equality test
+$\mathrm{NF}_R(\ell_2) = \mathrm{NF}_R(r_2)$ is a sound proof of $E \models E'$
+by the Knuth-Bendix soundness theorem and Birkhoff's completeness theorem
+\cite{birkhoff1935structure}.  The bounded BFS search serves as a fallback for
+the approximately 88\% of cases where KB does not terminate within the allotted time.
+
+For the \emph{negative path}, we encode the finite model finding problem as an
+SMT query in Z3 \cite{demoura2008z3} for domain sizes $n = 4$ and $n = 5$.
+Z3 is complete for each fixed finite domain: if no counterexample of size~$n$
+exists, Z3 returns \textsc{unsat}, providing stronger evidence for implication
+than a heuristic search that merely fails to find a witness.
+
+\para{The soundness invariant.}
+During evaluation, we discovered that a buggy KB implementation generated rewrite
+rules $\ell \to r$ with $\operatorname{vars}(r) \not\subseteq \operatorname{vars}(\ell)$---specifically,
+rules of the form $x \to y$ where $x$ and $y$ are distinct variables.  Such rules
+are not valid term rewriting rules under any reduction order, yet they can arise
+from incorrect variable renaming in the critical pair computation.  We prove
+(Theorem~\ref{thm:collapse}) that any TRS containing a rule with a free RHS variable
+collapses all normal forms to a single term, making the normal-form test trivially
+true for all equation pairs and producing an unlimited supply of false positives.
+Enforcing the invariant $\operatorname{vars}(r) \subseteq \operatorname{vars}(\ell)$ before accepting
+any rule eliminates this failure mode.
+
+\para{Main contributions.}
+\begin{itemize}[leftmargin=*,itemsep=2pt,topsep=2pt]
+  \item We formalize the \emph{soundness invariant} for KB completion in the equational
+        implication setting and prove that its violation causes total normal-form collapse
+        (Theorem~\ref{thm:collapse}).
+  \item We prove that, under the soundness invariant, KB completion provides a genuine
+        proof of equational implication with no false positives
+        (Theorem~\ref{thm:kb-soundness}).
+  \item We establish Z3's completeness for finite magma counterexample search at fixed
+        domain sizes (Proposition~\ref{prop:z3-complete}), replacing heuristic hill-climbing
+        with a decision procedure.
+  \item We show that the resulting layered classifier \textsc{predictor4} produces no false
+        positives from its KB component and achieves $100\%$ accuracy on stratified samples
+        of 50 and 200 implications from the ETP ground truth
+        (Theorem~\ref{thm:no-fp} and Section~\ref{sec:experiments}).
+\end{itemize}
+
+\para{Organization.}
+Section~\ref{sec:prelim} establishes notation and the necessary background on magmas,
+equational implication, and term rewriting.  Section~\ref{sec:main} presents the main
+theoretical results.  Section~\ref{sec:classifier} describes the layered decision
+procedure \textsc{predictor4}.  Section~\ref{sec:experiments} reports the empirical
+evaluation.  Section~\ref{sec:discussion} discusses limitations and open questions, and
+Section~\ref{sec:conclusion} concludes.

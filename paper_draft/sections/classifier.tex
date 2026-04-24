@@ -1,0 +1,114 @@
+\section{The \textsc{predictor4} Classifier}
+\label{sec:classifier}
+
+We describe the architecture of \textsc{predictor4}, a layered decision procedure
+for equational implication over magmas that integrates the sound components analyzed
+in Section~\ref{sec:main}.
+
+\subsection{Algorithm Overview}
+
+\textsc{predictor4} processes a pair $(E, E')$ of equational laws by a sequence of
+tests of increasing computational cost.  Each test either returns a confident
+classification or defers to the next layer.  The procedure is summarized as
+the following procedure.
+
+\begin{enumerate}[(1)]
+  \item \textbf{Trivial checks.}
+        If $E'$ is trivial ($\ell_{E'} = r_{E'}$ as terms), or if $E'$ is a
+        substitution instance of $E$ (direct specialization), classify as implication.
+        If $E$ is trivial, no non-trivial magma satisfies $E$, so the implication
+        vacuously fails; classify as non-implication.
+
+  \item \textbf{Knuth-Bendix completion (positive path, sound).}
+        Run KB completion on $E$ with the soundness guard
+        $\operatorname{vars}(r) \subseteq \operatorname{vars}(\ell)$ and a timeout of $0.8$~seconds.
+        If KB terminates with convergent TRS $R$ and
+        $\mathrm{NF}_R(\ell_{E'}) = \mathrm{NF}_R(r_{E'})$, classify as implication.
+        By Theorem~\ref{thm:kb-soundness}, this classification has no false positives.
+
+  \item \textbf{BFS reachability (positive path, fallback).}
+        Expand the set of terms reachable from $\ell_{E'}$ and $r_{E'}$ under
+        rewrites by $E$ via breadth-first search, bounded by a step limit.  If the
+        reachable sets intersect, classify as implication.  This step is used when
+        KB times out or fails; it is faster but provides a weaker soundness guarantee.
+
+  \item \textbf{Linear polynomial counterexample search.}
+        Evaluate $E$ and $E'$ in commutative polynomial rings $\mathbb{Z}/p\mathbb{Z}$
+        for $15$ primes $p$.  If some evaluation satisfies $E$ but violates $E'$,
+        a counterexample is found; classify as non-implication.
+
+  \item \textbf{Random polynomial evaluation.}
+        Evaluate $E$ and $E'$ under $640$ random multilinear maps over large primes.
+        If any evaluation satisfies $E$ but not $E'$, classify as non-implication.
+
+  \item \textbf{Exhaustive finite enumeration (sizes 2 and 3).}
+        Test all $16$ magmas of size 2 and all $19{,}683$ magmas of size 3.
+        Additionally test named structures (symmetric group $S_3$, quaternion group
+        $Q_8$, cyclic groups, affine magmas).  If any satisfies $E$ but not $E'$,
+        classify as non-implication.
+
+  \item \textbf{Z3 SMT model finding (negative path, sound and complete).}
+        Solve $\Phi_{E,E',4}$ with a timeout of $0.8$~seconds, then $\Phi_{E,E',5}$
+        with $0.6$~seconds.  By Theorem~\ref{thm:z3-complete}, if Z3 returns
+        \textsc{sat}, the extracted table $T$ is a verified counterexample; classify
+        as non-implication.  If Z3 returns \textsc{unsat}, no size-$n$ counterexample
+        exists.
+
+  \item \textbf{Structural feature estimation (fallback).}
+        If no test has returned a definitive answer, estimate implication probability
+        from structural features (variable counts, term depths, law type, canonical
+        signatures).  Return the estimated probability.
+\end{enumerate}
+
+\begin{theorem}[No False Positives from KB Component]\label{thm:no-fp}
+Let $(E, E')$ be any input pair.  If \textsc{predictor4} classifies $(E, E')$ as an
+implication via step~(2) (Knuth-Bendix completion), then $E \models E'$.
+\end{theorem}
+
+\begin{proof}
+Step~(2) returns a positive classification only if KB completion terminates
+successfully with a convergent TRS $R$ satisfying the soundness guard
+$\operatorname{vars}(r) \subseteq \operatorname{vars}(\ell)$ for all rules, and the normal-form test
+$\mathrm{NF}_R(\ell_{E'}) = \mathrm{NF}_R(r_{E'})$ holds.  By
+Theorem~\ref{thm:kb-soundness}, this implies $E \models E'$.
+\end{proof}
+
+\begin{theorem}[No False Positives from Z3 Component]\label{thm:z3-no-fp}
+If \textsc{predictor4} classifies $(E, E')$ as a non-implication via step~(7),
+then $E \not\models E'$.
+\end{theorem}
+
+\begin{proof}
+Step~(7) returns a negative classification only if Z3 returns \textsc{sat} for
+$\Phi_{E,E',n}$ with a concrete satisfying assignment $T$.  This $T$ is a size-$n$
+multiplication table for which $E$ holds universally and $E'$ fails existentially;
+that is, the magma $(M_T, *)$ with $|M_T| = n$ satisfies $E$ but not $E'$.
+Therefore $E \not\models E'$.
+\end{proof}
+
+\subsection{Implementation Details}
+
+\para{KB completion.}
+The KB completion module is implemented from scratch in Python (version 3.12),
+as no Python package providing this algorithm exists on standard package indices.
+Key components include: first-order unification via Robinson's algorithm
+\cite{robinson1965machine} with occurs check; the Lexicographic Path Order for
+rule orientation, with variables ordered alphabetically; critical pair computation
+with variable renaming to ensure disjointness; and normal-form reduction with a
+term size guard (80 nodes) and step limit (200 steps) to prevent divergence.
+The soundness guard ($\operatorname{vars}(r) \subseteq \operatorname{vars}(\ell)$) is checked before each
+rule is admitted to $R$.
+
+\para{Z3 encoding.}
+The Z3 encoding of $\Phi_{E,E',n}$ uses integer variables $T_{ij}$ constrained
+to $\{0,\ldots,n-1\}$.  Term evaluation is encoded recursively: for a subterm
+$u * v$, the value under assignment $\varphi$ is
+$\mathtt{If}(u_\varphi = 0 \wedge v_\varphi = 0,\, T_{00},\,
+   \mathtt{If}(u_\varphi = 0 \wedge v_\varphi = 1,\, T_{01},\, \ldots))$,
+giving a linear conditional chain of length $n^2$.  The universally quantified
+constraint for $E$ and the existentially quantified violation of $E'$ are expanded
+into conjunctions and disjunctions over all assignments.
+
+\para{Environment.}
+All experiments use Python~3.12.8, z3-solver~4.16.0, sympy~1.14.0, and
+pandas~3.0.2 on an x86-64 CPU.  All random seeds are fixed at 42.

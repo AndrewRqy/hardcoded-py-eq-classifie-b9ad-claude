@@ -1,0 +1,26 @@
+{
+  "success": true,
+  "stages": {
+    "resource_finder": {
+      "success": true,
+      "completion_marker": "/workspaces/hardcoded-py-eq-classifie-b9ad-claude/.resource_finder_complete",
+      "outputs": {
+        "literature_review": "/workspaces/hardcoded-py-eq-classifie-b9ad-claude/literature_review.md",
+        "resources_catalog": "/workspaces/hardcoded-py-eq-classifie-b9ad-claude/resources.md",
+        "papers_dir": "/workspaces/hardcoded-py-eq-classifie-b9ad-claude/papers",
+        "code_dir": "/workspaces/hardcoded-py-eq-classifie-b9ad-claude/code"
+      },
+      "log_file": "/workspaces/hardcoded-py-eq-classifie-b9ad-claude/logs/resource_finder_claude.log",
+      "transcript_file": "/workspaces/hardcoded-py-eq-classifie-b9ad-claude/logs/resource_finder_claude_transcript.jsonl",
+      "elapsed_time": 566.3251140117645
+    },
+    "experiment_runner": {
+      "success": true,
+      "return_code": 0,
+      "elapsed_time": 3626.458223581314,
+      "log_file": "/workspaces/hardcoded-py-eq-classifie-b9ad-claude/logs/execution_claude.log",
+      "transcript_file": "/workspaces/hardcoded-py-eq-classifie-b9ad-claude/logs/execution_claude_transcript.jsonl"
+    }
+  },
+  "work_dir": "/workspaces/hardcoded-py-eq-classifie-b9ad-claude"
+}

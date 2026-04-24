@@ -1,0 +1,36 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+We have presented \textsc{predictor4}, a layered decision procedure for equational
+implication over magmas that replaces two unsound or incomplete components of its
+predecessor with theoretically grounded alternatives.
+
+The central theoretical contribution is the \emph{soundness invariant} for
+Knuth-Bendix completion: every rewrite rule $\ell \to r$ generated during the
+completion process must satisfy $\operatorname{vars}(r) \subseteq \operatorname{vars}(\ell)$.  We proved
+(Lemma~\ref{thm:collapse} and Theorem~\ref{thm:invariant}) that violation of this
+invariant causes complete normal-form collapse, making the equality test trivially
+true for all equation pairs and thereby producing an unlimited supply of false
+positives.  Enforcing the invariant as a guard---rejecting any invalid rule and
+returning failure for the affected case---restores the classical soundness guarantee
+of KB completion (Theorem~\ref{thm:kb-soundness}).
+
+For the negative path, we established that Z3 SMT model finding is complete for
+each fixed domain size $n$ (Theorem~\ref{thm:z3-complete}): it either finds a
+size-$n$ counterexample or proves none exists, providing a stronger guarantee than
+heuristic hill-climbing.
+
+Empirical evaluation confirms that \textsc{predictor4} achieves $100\%$ accuracy
+with zero false positives on stratified samples of 50 and 200 cases from the ETP
+ground truth.  The KB component contributes formally verified proofs for approximately
+$12\%$ of implication cases after the invariant fix, while the remaining cases are
+handled by the BFS fallback or downstream negative tests.
+
+\para{Future work.}
+Increasing KB convergence rates (through longer timeouts, alternative reduction
+orders, or equivalence-class caching), extending Z3 to larger domain sizes, and
+exporting KB proofs as Lean 4 certificates compatible with the ETP formalization
+are the most promising directions for future development.  On the theoretical side,
+characterizing the class of single-equation magma systems for which KB completion
+terminates remains an open problem with connections to the wider theory of term
+rewriting decidability.

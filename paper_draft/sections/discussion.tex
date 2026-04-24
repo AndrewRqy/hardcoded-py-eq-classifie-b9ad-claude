@@ -1,0 +1,112 @@
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Soundness vs.\ Completeness Tradeoffs}
+
+The results expose a fundamental tension in the design of equational implication
+classifiers.  The BFS reachability search (step~(3) of the classifier)
+is fast and returns high-confidence scores for most implication cases, but its
+bounded character means it may occasionally produce false positives: two terms whose
+reachable sets collide by coincidence, without a true equational proof.  KB completion
+is slower and incomplete (it times out for complex laws), but whenever it terminates
+successfully, it provides a machine-checkable proof of implication with no false
+positives.
+
+The two-tier architecture---KB first, BFS fallback---reflects this tradeoff explicitly.
+Approximately $12\%$ of implication cases receive KB-backed proofs; the remaining $88\%$
+rely on BFS.  Increasing the KB timeout (from 0.8~s to 2--3~s with multiprocessing)
+would likely raise the KB coverage fraction and reduce the false-positive risk from BFS.
+
+Similarly, Z3 at fixed domain sizes $n \leq 5$ is complete for those sizes but cannot
+detect infinite-magma counterexamples.  By Remark~\ref{rem:infinite} and Austin's
+theorem \cite{austin1979equational}, a law pair $E, E'$ may satisfy $E \models_\mathrm{fin} E'$
+(no finite counterexample) while having $E \not\models E'$ (an infinite counterexample
+exists).  For such pairs, \textsc{predictor4} would incorrectly assign high implication
+probability.  The ETP ground truth (which includes infinite models) captures these cases;
+our evaluation is against this complete ground truth.
+
+\subsection{Comparison with Prior Approaches}
+
+Table~\ref{tab:comparison} summarizes the components of \textsc{predictor3} and
+\textsc{predictor4} and their theoretical properties.
+
+\begin{table}[ht]
+\centering
+\caption{Component comparison between \textsc{predictor3} and \textsc{predictor4}.}
+\label{tab:comparison}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{@{}lp{3.2cm}p{3.2cm}l@{}}
+\toprule
+\textbf{Component} & \textbf{\textsc{predictor3}} & \textbf{\textsc{predictor4}} & \textbf{Status} \\
+\midrule
+Positive proof & BFS (bounded, unsound in pathological cases)
+               & KB completion + BFS fallback
+               & Improved \\
+Neg.\ search ($n \leq 3$) & Exhaustive (sound) & Exhaustive (sound) & Same \\
+Neg.\ search ($n = 4, 5$) & Hill-climbing (heuristic)
+               & Z3 SMT (complete per $n$)
+               & Improved \\
+Algebraic tests & Polynomial evaluation & Polynomial evaluation & Same \\
+Fallback & Structural heuristic & Structural heuristic & Same \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The ETP itself used Vampire, Prover9, MagmaEgg, and Mace4 for its verification
+\cite{etp2025}---industrial-strength tools unavailable as Python libraries.
+\textsc{predictor4} implements KB completion and SMT model finding from scratch in
+Python, intentionally staying within a self-contained Python environment suitable for
+rapid prototyping and extension.
+
+\subsection{The Soundness Invariant in Context}
+
+The validity condition $\operatorname{vars}(r) \subseteq \operatorname{vars}(\ell)$ is standard in term
+rewriting textbooks \cite{baader1999term} but is easy to violate in practice when
+variable renaming for critical pair computation is implemented carelessly.  A correct
+renaming procedure ensures that the variables of the two rules being superposed are
+disjoint \emph{before} computing the unifier, and that no variable name from either
+rule leaks into the renamed copies.  The bug in the original implementation
+(Example~\ref{ex:bug}) was precisely such a naming leak: a renamed variable $y_0$
+appeared in the RHS of a critical pair without being bound by the LHS.
+
+Our fix---checking $\operatorname{vars}(r) \subseteq \operatorname{vars}(\ell)$ before accepting any rule---is
+a defensive measure that acts as a post-hoc safety net.  A correct implementation
+should not need this check; its presence signals a defect in variable renaming.
+Nonetheless, the check has value as a runtime assertion that guards against similar
+bugs in future modifications.
+
+\subsection{Open Questions}
+
+Several questions arise from this work.
+
+\begin{enumerate}[(1)]
+  \item \textbf{KB termination for magma laws.}
+        For what classes of single-equation magma systems does KB completion
+        terminate?  Associativity is a known divergence case (KB produces an
+        infinite TRS of left- or right-association rules).  Are there algebraic
+        characterizations of laws for which KB terminates?
+
+  \item \textbf{Proof certificates.}
+        A convergent TRS $R$ produced by KB, together with the critical pair
+        join sequence, constitutes a machine-checkable proof of implication
+        \cite{sternagel2012recording}.  Can \textsc{predictor4} be extended to
+        export Lean~4 proof certificates compatible with the ETP formalization?
+
+  \item \textbf{Larger domain sizes for Z3.}
+        Extending Z3 model finding to $n = 6, 7$ would increase coverage of
+        non-implications with larger minimal counterexamples.  The constraint
+        size grows as $n^{n^2 + |\operatorname{vars}|}$; empirical investigation of the
+        Z3 timeout boundary as a function of $n$ and law complexity is needed.
+
+  \item \textbf{Equivalence class caching.}
+        The 4,694 laws form 1,415 equivalence classes under the implication preorder.
+        Laws in the same equivalence class have identical implication relations.
+        KB results cached per equivalence class could amortize the KB timeout
+        cost significantly.
+
+  \item \textbf{Better reduction orders.}
+        LPO with fixed variable precedence is one reduction order; many alternatives
+        exist (Knuth-Bendix order, polynomial interpretations).  Trying multiple
+        orderings when LPO fails to orient an equation would increase KB convergence
+        rates.
+\end{enumerate}

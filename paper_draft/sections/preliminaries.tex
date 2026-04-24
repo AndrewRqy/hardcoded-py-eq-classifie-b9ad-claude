@@ -1,0 +1,194 @@
+\section{Preliminaries}
+\label{sec:prelim}
+
+We fix notation and recall standard definitions from universal algebra and term
+rewriting theory.  The reader may consult Baader and Nipkow \cite{baader1999term}
+for a comprehensive treatment.
+
+\subsection{Magmas and Equational Laws}
+
+\begin{definition}
+A \emph{magma} is a pair $(M, *)$ where $M$ is a nonempty set and
+$* \colon M \times M \to M$ is a binary operation.  We impose no additional axioms.
+\end{definition}
+
+Let $\mathcal{X} = \{x, y, z, w, \ldots\}$ be a countably infinite set of
+\emph{variables} and let $\Sigma = \{*\}$ be the signature consisting of a single
+binary operation symbol.  The set $T(\Sigma, \mathcal{X})$ of \emph{terms} over
+$\Sigma$ and $\mathcal{X}$ is defined inductively: every variable $x \in \mathcal{X}$
+is a term, and if $s, t$ are terms then $s * t$ is a term.
+
+\begin{definition}
+An \emph{equational law} is a pair of terms $(s, t) \in T(\Sigma, \mathcal{X})^2$,
+written $s = t$.  An equational law $s = t$ is \emph{trivial} if $s$ and $t$ are
+identical as terms.
+\end{definition}
+
+\begin{definition}
+A magma $(M, *)$ \emph{satisfies} an equational law $s = t$, written
+$M \models (s = t)$, if for every assignment $\varphi \colon \mathcal{X} \to M$ of
+variables to elements, the evaluations $\varphi(s)$ and $\varphi(t)$ in $M$ coincide.
+Here $\varphi$ extends to all terms by $\varphi(u * v) = \varphi(u) * \varphi(v)$.
+\end{definition}
+
+\begin{definition}\label{def:implication}
+An equational law $E$ \emph{implies} an equational law $E'$, written $E \models E'$,
+if every magma satisfying $E$ also satisfies $E'$.  We write $E \not\models E'$ for
+the negation; in this case any magma satisfying $E$ but not $E'$ is a
+\emph{counterexample} to the implication.
+\end{definition}
+
+\begin{example}
+Let $E$ be the \emph{left-zero} law $x * y = x$ and let $E'$ be $x * y = y * x$
+(commutativity).  Then $E \models E'$: if $a * b = a$ for all $a, b$ then
+$a * b = a = b * a$ for all $a, b$.  Conversely, let $E$ be commutativity.  The
+magma on $\{0, 1\}$ with $0*0=1, 0*1=1, 1*0=1, 1*1=0$ satisfies commutativity
+but not left-zero, so commutativity does not imply left-zero.
+\end{example}
+
+\begin{remark}
+The implication relation $\models$ is a preorder on equational laws.  The trivial
+law $x = x$ is satisfied by every magma and hence is implied by every law.  The
+law $x = y$ (identifying all elements) is satisfied only by singleton magmas and
+implies every other law.
+\end{remark}
+
+\subsection{Term Rewriting Systems}
+
+\begin{definition}
+A \emph{rewrite rule} is an ordered pair $(\ell, r)$ of terms written $\ell \to r$.
+A \emph{term rewriting system} (TRS) is a finite set $R$ of rewrite rules.
+\end{definition}
+
+For a rule $\ell \to r$, let $\operatorname{vars}(\ell)$ and $\operatorname{vars}(r)$ denote the sets of
+variables occurring in $\ell$ and $r$ respectively.  A rule $\ell \to r$ is
+\emph{left-linear} if each variable of $\operatorname{vars}(\ell)$ occurs at most once in $\ell$.
+
+\begin{definition}\label{def:valid-rule}
+A rewrite rule $\ell \to r$ is \emph{valid} (or \emph{regular}) if
+$\operatorname{vars}(r) \subseteq \operatorname{vars}(\ell)$.  A TRS is valid if every rule is valid.
+\end{definition}
+
+The validity condition ensures that no RHS variable is ``free'' (unbound by the LHS
+match), a necessary condition for the rule to be applicable under a reduction order.
+
+\begin{definition}
+Given a TRS $R$ and terms $s, t$, we write $s \to_R t$ if there exists a rule
+$\ell \to r \in R$, a position $p$ in $s$, and a substitution $\sigma$ such that
+$s|_p = \ell\sigma$ and $t = s[r\sigma]_p$ (replacing the subterm at position $p$
+by $r\sigma$).  We write $\to_R^*$ for the reflexive-transitive closure.
+\end{definition}
+
+\begin{definition}
+A term $t$ is a \emph{normal form} under $R$ if no rule of $R$ applies to any
+subterm of $t$.  If every term has a normal form, $R$ is called \emph{terminating}
+(or \emph{strongly normalizing}).  We write $\mathrm{NF}_R(t)$ for the normal
+form of $t$ when it is unique.
+\end{definition}
+
+\begin{definition}
+$R$ is \emph{confluent} if whenever $s \to_R^* t_1$ and $s \to_R^* t_2$ there
+exists $u$ with $t_1 \to_R^* u$ and $t_2 \to_R^* u$.  $R$ is \emph{convergent}
+if it is both terminating and confluent; in this case every term has a unique normal
+form.
+\end{definition}
+
+\begin{definition}
+A \emph{reduction order} $>$ on terms is a strict order that is well-founded,
+stable under substitution ($s > t \Rightarrow s\sigma > t\sigma$ for all $\sigma$),
+and compatible with context ($s > t \Rightarrow u[s]_p > u[t]_p$ for all contexts).
+\end{definition}
+
+\begin{definition}[Lexicographic Path Order \cite{dershowitz1987orderings}]
+Fix a strict total order (precedence) on function symbols.  The \emph{Lexicographic
+Path Order} (LPO) $>_{\mathrm{lpo}}$ is defined recursively: $f(s_1,\ldots,s_m)
+>_{\mathrm{lpo}} g(t_1, \ldots, t_n)$ if (i) $f > g$ and $f(s_1,\ldots,s_m) >_{\mathrm{lpo}} t_j$
+for all $j$, or (ii) $f = g$ and $(s_1,\ldots,s_m) >_{\mathrm{lex}} (t_1,\ldots,t_n)$
+and $s_i >_{\mathrm{lpo}} t_j$ for all $j$ beyond the first differing position,
+or (iii) $s_i \geq_{\mathrm{lpo}} g(t_1,\ldots,t_n)$ for some $i$.  LPO is a
+reduction order.
+\end{definition}
+
+\subsection{Knuth-Bendix Completion}
+
+\begin{definition}
+Given rules $\ell_1 \to r_1$ and $\ell_2 \to r_2$ (renamed to have disjoint
+variables), a \emph{critical pair} arises when a non-variable subterm $\ell_1|_p$
+unifies with $\ell_2$ via most general unifier $\sigma$.  The critical pair is
+$(r_1\sigma,\; \ell_1\sigma[r_2\sigma]_p)$: the two ways of rewriting $\ell_1\sigma$.
+\end{definition}
+
+The following classical result underpins the soundness of KB completion.
+
+\begin{theorem}[Critical Pair Lemma, Huet \cite{huet1980confluent}]\label{thm:cpl}
+A terminating TRS $R$ is confluent if and only if every critical pair $(s, t)$ of
+$R$ is \emph{joinable}: there exists $u$ with $s \to_R^* u$ and $t \to_R^* u$.
+\end{theorem}
+
+\begin{definition}[Knuth-Bendix Completion \cite{knuth1970simple}]
+\label{def:kb}
+Given an equational system $E = \{E_1, \ldots, E_k\}$ and a reduction order $>$,
+\emph{Knuth-Bendix completion} is a procedure that attempts to construct a convergent
+TRS $R$ equationally equivalent to $E$.  At each step, equations in $E$ are oriented
+into rules using $>$, critical pairs of $R$ are computed, and unjoinable pairs are
+added back to $E$ as new equations.  The procedure
+\begin{itemize}[leftmargin=*,itemsep=1pt,topsep=2pt]
+  \item \emph{succeeds} if $E$ becomes empty (all critical pairs are joinable),
+        yielding a convergent $R$;
+  \item \emph{fails} if some equation cannot be oriented by $>$; or
+  \item \emph{diverges} if the process never terminates.
+\end{itemize}
+\end{definition}
+
+The central soundness result for KB completion is the following.
+
+\begin{theorem}[KB Soundness \cite{knuth1970simple,baader1999term}]\label{thm:kb-classical}
+Let $E$ be an equational system.  If Knuth-Bendix completion terminates successfully
+with convergent TRS $R$, then for all terms $s, t$:
+\[
+  E \models (s = t)
+  \quad\Longleftrightarrow\quad
+  \mathrm{NF}_R(s) = \mathrm{NF}_R(t).
+\]
+\end{theorem}
+
+\begin{proof}
+By Birkhoff's completeness theorem \cite{birkhoff1935structure}, $E \models (s = t)$
+iff $s \leftrightarrow_E^* t$ (the terms are connected by a sequence of equational
+rewrites from $E$).  Since $R$ is equationally equivalent to $E$, we have
+$s \leftrightarrow_E^* t$ iff $s \leftrightarrow_R^* t$.  Since $R$ is convergent,
+$s \leftrightarrow_R^* t$ iff $\mathrm{NF}_R(s) = \mathrm{NF}_R(t)$ (both sides
+reduce to the unique normal form of their equivalence class).
+\end{proof}
+
+\subsection{Finite Model Finding and SMT}
+
+\begin{definition}
+A \emph{finite magma counterexample} of size $n$ for the implication $E \models E'$
+is a magma $(M, *)$ with $|M| = n$ such that $M \models E$ but $M \not\models E'$.
+\end{definition}
+
+\begin{proposition}[Finite Model Finding Completeness]\label{prop:z3-complete}
+For any fixed $n \geq 1$, there is a decision procedure that determines in finite
+time whether a size-$n$ magma counterexample to $E \models E'$ exists.
+\end{proposition}
+
+\begin{proof}
+A magma of size $n$ is determined by its multiplication table: an $n \times n$
+array $T$ with $T_{ij} \in \{0,\ldots,n-1\}$.  The constraint ``$M \models E$''
+for $E = (\ell_E = r_E)$ is a conjunction of $n^{|\operatorname{vars}(E)|}$ equalities, one
+per variable assignment, each expressible as an arithmetic constraint on the
+$T_{ij}$.  Similarly, ``$M \not\models E'$'' is a disjunction of $n^{|\operatorname{vars}(E')|}$
+disequalities.  The resulting propositional arithmetic formula is finite and can be
+decided by any complete SAT/SMT solver (for instance, by exhaustive search or by
+the DPLL(T) algorithm \cite{demoura2008z3}).
+\end{proof}
+
+\begin{remark}
+Proposition~\ref{prop:z3-complete} establishes completeness for each \emph{fixed}
+$n$.  The implication problem over \emph{all} finite magmas---asking whether $E$
+and $E'$ disagree on some finite magma---remains undecidable in general
+\cite{mckenzie1971spectra}.  Moreover, by Austin's theorem \cite{austin1979equational},
+finite implication ($E \models_\mathrm{fin} E'$: every finite magma satisfying $E$
+also satisfies $E'$) is strictly weaker than the full implication $E \models E'$.
+\end{remark}

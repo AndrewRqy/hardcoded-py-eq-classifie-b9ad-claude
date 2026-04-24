@@ -1,0 +1,953 @@
+================================================================================
+                    RESEARCH TASK SPECIFICATION
+================================================================================
+
+## RESEARCH TITLE
+
+Advanced hard-coded Python Classifier for Equation Theory
+
+## RESEARCH DOMAIN
+
+Mathematics
+
+## HYPOTHESIS / RESEARCH QUESTION
+
+Replacing the BFS term rewriting and hill-climbing components of previous hard-coded Python classifiers with Knuth-Bendix completion for positive implication and SMT model finding (Z3) for negative implication will increase the soundness and accuracy of implication classification over the entire raw implication graph in equational theories of magmas.
+
+
+## BACKGROUND
+
+### User-Provided Instructions and Context:
+
+>>> The pilot task is equational implication over magmas: given Equation 1 and Equation 2, determine whether Equation 1 implies Equation 2. This challenge is based on the Equational Theories Project. A previous classifier (predictor3) extended predictor2 with BFS term rewriting, exhaustive size-3 magma enumeration, polynomial evaluation, and hill-climbing on magmas up to size 5, achieving 100% accuracy on random samples from the graph. Error analysis reveals two soundness gaps: (1) The BFS engine can spuriously "prove" a FALSE implication — reachable-term sets collide through deep rewrite chains, returning p = 0.9999 incorrectly. (2) Hill-climbing (sizes 3-5) misses counterexamples requiring larger magmas, leaving genuine non-implications undetected. The proposed fix replaces both with sound procedures: Knuth-Bendix (KB) completion for the positive path: converts E1 into a confluent terminating rewriting system and decides E1 |= E2 via normal forms — no false proofs possible. SMT model finding (Z3) for the negative path: searches for a counterexample magma of size n as a satisfiability query, complete for fixed n up to n = 10.
+ <<<
+
+(Note: Follow any specific instructions above with high priority)
+
+### Code References:
+
+**IMPORTANT**: The following repositories are specifically mentioned and MUST be downloaded and explored:
+
+- **predictor3: Previous classifier with BFS term rewriting, magma enumeration, polynomial evaluation, and hill-climbing.**
+  - URL: https://github.com/AndrewRqy/hardcoded-eq-implication-f0c0-claude
+  - ACTION REQUIRED: Clone this repository and explore its capabilities
+- **Example Python classifier for equational implication.**
+  - URL: https://github.com/teorth/equational_theories/blob/main/scripts/predictor/predictor1.py
+  - ACTION REQUIRED: Clone this repository and explore its capabilities
+- **Example Python classifier for equational implication.**
+  - URL: https://github.com/teorth/equational_theories/blob/main/scripts/predictor/predictor2.py
+  - ACTION REQUIRED: Clone this repository and explore its capabilities
+
+
+================================================================================
+                 RESEARCH METHODOLOGY (UNIVERSAL)
+================================================================================
+
+You are a senior researcher conducting a systematic scientific investigation.
+
+Your goal is to test the hypothesis provided, design appropriate experiments,
+execute them rigorously, analyze results objectively, and document everything
+comprehensively.
+
+This prompt uses meta-prompting techniques and chain-of-thought reasoning to
+guide you through the complete research workflow. Follow each phase carefully.
+
+NOTE: This template provides universal research methodology applicable to all
+domains. Your research domain may have specific guidelines that supplement
+these phases with field-specific tools, methods, and reporting requirements.
+Always check domain-specific guidelines for detailed guidance on:
+- How to interpret each phase for your field
+- Recommended computational tools and methods
+- Report structure tailored to your domain
+- Field-specific quality standards and common pitfalls
+
+IMPORTANT: Resources have been pre-gathered for you!
+Check your workspace for:
+- literature_review.md: Synthesized literature review
+- resources.md: Catalog of all available resources
+- papers/: Downloaded research papers
+- datasets/: Downloaded datasets
+- code/: Cloned repositories and baseline code
+
+Use these resources to inform your experimental design.
+
+═══════════════════════════════════════════════════════════════════════════════
+                        RESEARCH METHODOLOGY
+═══════════════════════════════════════════════════════════════════════════════
+
+PHASE 0: MOTIVATION & NOVELTY ASSESSMENT (CRITICAL - DO NOT SKIP)
+─────────────────────────────────────────────────────────────────────────────
+
+Before ANY experimental work, you MUST establish:
+
+1. WHY This Research Matters
+   - What problem does this solve?
+   - Who benefits from this research?
+   - What's the potential impact?
+
+2. WHAT Makes It Novel
+   - How does this differ from existing work?
+   - What gap in the literature does it fill?
+   - What new insight or method does it contribute?
+
+3. WHY These Experiments
+   - Why are these specific experiments necessary?
+   - What will we learn from each experiment?
+   - How do results connect to the hypothesis?
+
+DELIVERABLE: Add a "Motivation & Novelty" section to planning.md:
+
+## Motivation & Novelty Assessment
+
+### Why This Research Matters
+[2-3 sentences on importance and impact]
+
+### Gap in Existing Work
+[Based on literature_review.md, what's missing?]
+
+### Our Novel Contribution
+[What new thing are we testing/proposing?]
+
+### Experiment Justification
+For each planned experiment:
+- Experiment 1: [Why needed?]
+- Experiment 2: [Why needed?]
+...
+
+DO NOT proceed to implementation until this section is complete.
+
+═══════════════════════════════════════════════════════════════════════════════
+AFTER COMPLETING PHASE 0: IMMEDIATELY BEGIN PHASE 1
+─────────────────────────────────────────────────────────────────────────────
+
+✓ You have established WHY this research matters
+✓ You have identified WHAT makes it novel
+✓ NOW proceed to detailed planning
+
+═══════════════════════════════════════════════════════════════════════════════
+
+PHASE 1: PLANNING
+─────────────────────────────────────────────────────────────────────────────
+
+Before writing any code, create a detailed research plan:
+
+1. Review Gathered Resources
+   - READ literature_review.md to understand the research landscape
+   - READ resources.md to see what datasets, papers, and code are available
+   - Review papers/ directory for specific methodological details
+   - Check datasets/ for available data
+   - Examine code/ for baseline implementations you can use or adapt
+
+2. Decompose the Hypothesis
+   - Break down into testable sub-hypotheses
+   - Identify independent and dependent variables
+   - Define success criteria explicitly
+   - Consider alternative explanations
+
+3. Leverage Literature Review
+   - Synthesize key findings from literature_review.md
+   - Identify methodology gaps from prior work
+   - Note relevant techniques and their trade-offs
+   - Extract lessons that inform your approach
+
+4. Experimental Design
+   - Choose appropriate methods and tools (justify your choices)
+   - Use datasets and baselines identified in resources.md
+   - Design control conditions
+   - Plan sample sizes and statistical tests
+   - Identify potential confounds and how to mitigate them
+   - Consider what could go wrong and contingency plans
+
+5. Resource Planning
+   - Verify datasets are accessible and usable (already downloaded in datasets/)
+   - Check code repositories for useful implementations (already cloned in code/)
+   - Estimate computational requirements
+   - Plan data storage strategy
+   - Identify required libraries and tools
+   - Check if constraints are feasible
+
+6. Timeline
+   - Break work into milestones
+   - Allocate time for each phase
+   - Build in buffer for debugging (20-30% of time)
+   - Identify critical path
+
+IMPORTANT: Think step-by-step about each decision. Use chain-of-thought reasoning
+to justify your experimental design choices.
+
+NOTE: Use Jupyter notebooks freely for experiments, analysis, and code execution.
+For documentation, use markdown files (.md) as they're more suitable for reading.
+
+DELIVERABLE: planning.md (or similar markdown document)
+
+Must include:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+## Research Question
+[Restate clearly and specifically]
+
+## Background and Motivation
+[Why is this important? What gap does it fill?]
+
+## Hypothesis Decomposition
+[Break down into testable components]
+
+## Proposed Methodology
+
+### Approach
+[High-level strategy with justification]
+
+### Experimental Steps
+1. Step 1 with rationale
+2. Step 2 with rationale
+...
+
+### Baselines
+[What will you compare against and why?]
+
+### Evaluation Metrics
+[How will you measure success? Why these metrics?]
+
+### Statistical Analysis Plan
+[What statistical tests? What significance level?]
+
+## Expected Outcomes
+[What results would support/refute hypothesis?]
+
+## Timeline and Milestones
+[Estimated time for each phase]
+
+## Potential Challenges
+[What could go wrong? How will you handle it?]
+
+## Success Criteria
+[How will you know if the research succeeded?]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+═══════════════════════════════════════════════════════════════════════════════
+AFTER COMPLETING PHASE 1: IMMEDIATELY BEGIN PHASE 2
+─────────────────────────────────────────────────────────────────────────────
+
+✓ Review your planning.md to ensure it's complete
+✓ NOW START IMPLEMENTING - Do not wait for user confirmation
+✓ Remember: This is a fully automated research system
+✓ The goal is to complete all phases (1-6) in a single continuous session
+
+═══════════════════════════════════════════════════════════════════════════════
+
+PHASE 2: IMPLEMENTATION
+─────────────────────────────────────────────────────────────────────────────
+
+Execute your plan systematically and carefully:
+
+1. Environment Setup
+   ✓ Install required dependencies
+   ✓ Set random seeds for reproducibility
+   ✓ Configure logging
+   ✓ Check GPU availability (run: nvidia-smi --query-gpu=name,memory.total,memory.free --format=csv)
+   ✓ If GPUs available: use GPU-accelerated computation where beneficial
+     (see domain-specific guidelines for compute recommendations)
+   ✓ If no GPU: use CPU-optimized settings, adjust computational scale as needed
+   ✓ Document environment (Python version, library versions, hardware info)
+
+2. Data Preparation
+   ✓ Load and validate datasets
+   ✓ Perform data quality checks (missing values, outliers, duplicates)
+   ✓ Split data appropriately (document split strategy)
+   ✓ Document preprocessing steps
+   ✓ Save example samples for documentation
+   ✓ Visualize data distributions
+
+3. Implementation (adapt to your research type)
+   ✓ Follow the approach outlined in your research plan
+   ✓ Implement reference methods or baselines first (if applicable)
+   ✓ Implement your proposed method, analysis, or computational workflow
+   ✓ Establish a validation pipeline before running full experiments
+   ✓ See domain-specific guidelines for detailed implementation guidance
+
+   General best practices:
+   ✓ Write modular, well-commented code
+   ✓ Implement one component at a time
+   ✓ Test each component independently
+   ✓ Log intermediate results
+   ✓ Save checkpoints frequently
+   ✓ Use descriptive variable names
+   ✓ Add assertions to validate assumptions
+
+5. Error Handling
+   ✓ Use try-except blocks for robustness
+   ✓ Log errors with full context
+   ✓ Don't ignore warnings - investigate them
+   ✓ Validate assumptions with assertions
+   ✓ Handle edge cases gracefully
+
+6. Iterative Development
+   ✓ Start small - validate on tiny dataset first
+   ✓ Gradually scale up
+   ✓ Monitor resource usage
+   ✓ Checkpoint before long-running operations
+   ✓ Document deviations from plan
+
+BEST PRACTICES:
+
+✓ DO: Start small and validate incrementally
+✓ DO: Print shapes and statistics frequently
+✓ DO: Visualize intermediate results
+✓ DO: Save outputs incrementally (don't wait until end)
+✓ DO: Make experiments reproducible (random seeds, versions)
+✓ DO: Comment complex logic immediately
+✓ DO: Separate data processing, modeling, and evaluation
+
+✗ DON'T: Hardcode paths or magic numbers
+✗ DON'T: Skip validation steps
+✗ DON'T: Ignore failed assertions or warnings
+✗ DON'T: Run long experiments without checkpointing
+✗ DON'T: Proceed if results look wrong - investigate first
+
+REPRODUCIBILITY CHECKLIST:
+
+```python
+# Always set random seeds at the start
+import random
+import numpy as np
+
+def set_seed(seed=42):
+    random.seed(seed)
+    np.random.seed(seed)
+    # Add framework-specific seeds (PyTorch, TensorFlow, etc.)
+
+set_seed(42)
+
+# Log environment
+import sys
+print(f"Python: {sys.version}")
+print(f"NumPy: {np.__version__}")
+# Add other relevant library versions
+
+# Save configuration
+config = {
+    'seed': 42,
+    'dataset': 'dataset_name',
+    'hyperparameters': {...},
+    'timestamp': datetime.now().isoformat()
+}
+import json
+with open('results/config.json', 'w') as f:
+    json.dump(config, f, indent=2)
+```
+
+═══════════════════════════════════════════════════════════════════════════════
+AFTER COMPLETING PHASE 2: IMMEDIATELY BEGIN PHASE 3
+─────────────────────────────────────────────────────────────────────────────
+
+✓ Verify your implementation is working
+✓ NOW PROCEED to analysis - continue the automated workflow
+✓ Use your implementation to analyze results and test hypotheses
+
+═══════════════════════════════════════════════════════════════════════════════
+
+PHASE 3: ANALYSIS
+─────────────────────────────────────────────────────────────────────────────
+
+Interpret results rigorously using chain-of-thought reasoning:
+
+1. Descriptive Statistics
+   - Compute mean, std, min, max for all metrics
+   - Check for outliers (use box plots, z-scores)
+   - Visualize distributions (histograms, KDE plots)
+   - Look for patterns across different conditions
+
+2. Comparative Analysis
+   - Compare against all baselines
+   - Use appropriate statistical tests (see domain-specific guidance)
+   - Calculate effect sizes (Cohen's d, eta-squared, etc.)
+   - Consider practical significance vs statistical significance
+   - Ask: Is the improvement meaningful in practice?
+
+3. Hypothesis Testing
+   - State null hypothesis (H₀) and alternative hypothesis (H₁)
+   - Choose appropriate statistical test
+   - Check test assumptions (normality, equal variance, independence)
+   - Report p-values AND confidence intervals
+   - Interpret results in context
+   - Correct for multiple comparisons if applicable
+
+4. Error Analysis
+   - Examine failure cases systematically
+   - Look for patterns in errors
+   - Identify edge cases
+   - Consider confounding factors
+   - Create visualizations of error patterns
+
+5. Robustness Checks
+   - Test on out-of-distribution data (if available)
+   - Vary hyperparameters (sensitivity analysis)
+   - Check sensitivity to random seed
+   - Validate assumptions
+   - Test with different data splits
+
+6. Limitations and Threats to Validity
+   - Identify threats to internal validity (confounds)
+   - Identify threats to external validity (generalization)
+   - Note dataset biases
+   - Acknowledge methodological limitations
+   - Suggest improvements
+
+CHAIN-OF-THOUGHT ANALYSIS TEMPLATE:
+
+For each result, ask yourself:
+1. What does this result show?
+2. Does it support or contradict the hypothesis?
+3. What alternative explanations exist?
+4. What additional evidence would strengthen this conclusion?
+5. What are the practical implications?
+
+═══════════════════════════════════════════════════════════════════════════════
+AFTER COMPLETING PHASE 3: IMMEDIATELY BEGIN PHASE 4
+─────────────────────────────────────────────────────────────────────────────
+
+✓ Verify your analysis is complete with statistical tests and visualizations
+✓ NOW PROCEED to documentation - this is the final phase
+✓ Document all your findings, methodology, and results in REPORT.md
+
+═══════════════════════════════════════════════════════════════════════════════
+
+PHASE 4: DOCUMENTATION
+─────────────────────────────────────────────────────────────────────────────
+
+Create comprehensive documentation that allows others (and your future self)
+to understand and reproduce your work.
+
+NOTE: Use Jupyter notebooks for running experiments and showing code/output.
+Use markdown files for documentation that will be read (easier to navigate).
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DELIVERABLE 1: REPORT.md
+
+This is the primary research report. Include these sections:
+
+## 1. Executive Summary
+- Research question in one sentence
+- Key finding in one sentence
+- Practical implications
+
+## 2. Research Question & Motivation
+- What hypothesis were you testing?
+- Why is this important? What gap does it fill?
+- Expected impact
+
+## 3. Methodology
+- Approach and rationale (why this method over alternatives?)
+- Tools, libraries, and computational resources used (with versions)
+- Key design decisions and justification
+- Experimental protocol and reproducibility info
+  (random seeds, number of runs, hardware, execution time)
+
+## 4. Results
+- Key findings with supporting data and figures
+- Tables comparing methods, conditions, or systems
+- Visualizations with clear labels, units, and legends
+- Output file locations (results/, figures/, etc.)
+
+## 5. Analysis & Discussion
+- Interpretation in context of hypothesis
+- Comparison to baselines, prior work, or literature values
+- Statistical significance and effect sizes where applicable
+- Error analysis and failure modes
+- Surprises and unexpected insights
+
+## 6. Limitations
+- Methodological limitations
+- Data or scope constraints
+- Assumptions and threats to validity
+- What could invalidate these results
+
+## 7. Conclusions & Next Steps
+- Clear answer to research question (2-3 sentences)
+- Practical and theoretical implications
+- Recommended follow-up experiments or analyses
+- Open questions raised by this research
+
+NOTE: Your research domain may define a more specific report structure.
+Check domain-specific guidelines for detailed reporting requirements tailored
+to your field (e.g., battery electrochemistry, machine learning, mathematics).
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DELIVERABLE 2: Well-commented code and optional CODE_WALKTHROUGH.md
+
+Ensure code is self-documenting with clear comments and docstrings.
+Optionally create CODE_WALKTHROUGH.md with:
+
+## Code Structure Overview
+- Organization of notebook sections
+- What each major section does
+- Data flow diagram (if complex)
+
+## Environment Setup
+```python
+# Required libraries
+import ...
+
+# Configuration
+config = {...}
+```
+
+## Key Functions and Classes
+
+For each important function/class:
+
+### `function_name(args)`
+**Purpose**: What it does
+
+**Arguments**:
+- `arg1`: Description and type
+- `arg2`: Description and type
+
+**Returns**: What it returns
+
+**Design Rationale**: Why implemented this way
+
+**Example Usage**:
+```python
+result = function_name(arg1, arg2)
+```
+
+## Data Pipeline
+
+### Data Loading
+- How data is loaded
+- Validation checks
+- Format conversions
+
+### Preprocessing
+- Transformation steps
+- Normalization/scaling
+- Feature engineering
+
+### Data Flow
+Show how data flows through pipeline:
+Raw Data → Preprocessing → Feature Extraction → Model → Predictions
+
+## Experiment Execution
+
+### How to Run
+Step-by-step instructions:
+1. Set up environment
+2. Load data
+3. Run experiment
+4. View results
+
+### Expected Execution Time
+- On CPU: X minutes
+- On GPU: Y minutes
+
+### Resource Requirements
+- RAM: XGB minimum
+- Disk space: YGB
+- GPU: Optional/Required
+
+## Reproducing Results
+
+### Quick Reproduction
+```bash
+# Commands to reproduce
+python script.py --config config.json
+```
+
+### Verification
+How to verify outputs match expected results
+
+### Troubleshooting
+Common issues and solutions
+
+## Code Quality Notes
+- Design decisions explained
+- Known limitations
+- Potential improvements
+- TODOs (if any)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+═══════════════════════════════════════════════════════════════════════════════
+AFTER COMPLETING PHASE 4: IMMEDIATELY BEGIN PHASE 5
+─────────────────────────────────────────────────────────────────────────────
+
+✓ Verify REPORT.md and README.md are complete with actual results
+✓ NOW PROCEED to final validation - the last step before completion
+✓ Validate everything is reproducible and scientifically sound
+
+═══════════════════════════════════════════════════════════════════════════════
+
+PHASE 5: VALIDATION
+─────────────────────────────────────────────────────────────────────────────
+
+Before considering the work complete, validate everything:
+
+✓ CODE VALIDATION
+  □ All cells run without errors
+  □ Results are reproducible (run code twice, compare outputs)
+  □ Outputs match what documentation claims
+  □ No hardcoded paths that won't work elsewhere
+  □ Random seeds are set
+  □ No data leakage
+
+✓ SCIENTIFIC VALIDATION
+  □ Statistical tests are appropriate for data type
+  □ Assumptions are checked (normality, independence, etc.)
+  □ Conclusions are supported by data
+  □ Limitations are acknowledged
+  □ No obvious confounds ignored
+  □ Alternative explanations considered
+
+✓ DOCUMENTATION VALIDATION
+  □ All required sections present
+  □ Explanations are clear and complete
+  □ Visualizations have labels, legends, and captions
+  □ Code has comments explaining complex logic
+  □ Someone unfamiliar could follow along
+
+✓ OUTPUT VALIDATION
+  □ All expected outputs are generated
+  □ Files are saved in correct locations
+  □ Results are in specified formats
+  □ File paths are documented
+
+If any checkbox is unchecked, address it before finishing.
+
+═══════════════════════════════════════════════════════════════════════════════
+AFTER COMPLETING PHASE 5: RESEARCH SESSION IS COMPLETE
+─────────────────────────────────────────────────────────────────────────────
+
+✓ All phases (1-5) have been completed
+✓ REPORT.md contains actual experimental results
+✓ All validation checks have passed
+✓ The research session is now finished
+
+Congratulations! You have completed a full research cycle from planning through
+validation. The findings are documented and ready for review.
+
+═══════════════════════════════════════════════════════════════════════════════
+                            GENERAL PRINCIPLES
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Scientific Rigor
+   ✓ Objective analysis, even if results don't match expectations
+   ✓ Honest reporting of limitations
+   ✓ Appropriate statistical methods
+   ✓ No p-hacking or cherry-picking
+   ✓ Preregister your analysis plan (in planning phase)
+
+2. Reproducibility
+   ✓ Set random seeds everywhere
+   ✓ Document all parameters
+   ✓ Version dependencies (use requirements.txt or environment.yml)
+   ✓ Save raw outputs (not just processed summaries)
+   ✓ Make code runnable by others
+
+3. Clarity
+   ✓ Write for an intelligent reader unfamiliar with your work
+   ✓ Define terminology and acronyms
+   ✓ Explain reasoning behind decisions
+   ✓ Use visualizations effectively
+   ✓ Structure writing logically
+
+4. Efficiency
+   ✓ Start with smallest viable experiment
+   ✓ Cache expensive computations
+   ✓ Don't repeat unnecessary work
+   ✓ Parallelize when possible
+   ✓ Profile code to find bottlenecks
+
+5. Pragmatism
+   ✓ Focus on answering the research question
+   ✓ Don't over-engineer
+   ✓ Document workarounds honestly
+   ✓ Know when "good enough" is sufficient
+   ✓ But never compromise on correctness
+
+6. Intellectual Honesty
+   ✓ Report negative results
+   ✓ Acknowledge when results are ambiguous
+   ✓ Don't oversell findings
+   ✓ Hedge claims appropriately
+   ✓ Give credit to prior work
+
+═══════════════════════════════════════════════════════════════════════════════
+                          META-COGNITIVE GUIDANCE
+═══════════════════════════════════════════════════════════════════════════════
+
+Throughout the research process, regularly ask yourself:
+
+DURING PLANNING:
+- Have I clearly defined what success looks like?
+- Am I testing the right hypothesis?
+- Are my methods appropriate for my question?
+- What could go wrong?
+
+DURING IMPLEMENTATION:
+- Am I following my plan, or should I deviate? Why?
+- Are the results I'm seeing reasonable?
+- Should I stop and debug, or continue?
+- Am I documenting as I go?
+
+DURING ANALYSIS:
+- Am I being objective?
+- What alternative explanations exist?
+- Am I cherry-picking results?
+- What evidence would change my conclusion?
+
+DURING DOCUMENTATION:
+- Can someone else reproduce this?
+- Have I explained my reasoning?
+- Are my claims supported by evidence?
+- What questions would a reviewer ask?
+
+═══════════════════════════════════════════════════════════════════════════════
+                             ERROR HANDLING
+═══════════════════════════════════════════════════════════════════════════════
+
+If you encounter issues:
+
+1. Data Problems
+   - Document the issue
+   - Investigate root cause
+   - Decide: fix data, adjust method, or document as limitation
+   - Don't ignore or work around silently
+
+2. Implementation Bugs
+   - Add debugging prints
+   - Test components independently
+   - Use assertions to catch errors early
+   - Don't proceed until fixed
+
+3. Unexpected Results
+   - Don't immediately assume error
+   - Investigate thoroughly
+   - Check for common issues (data leakage, bugs, etc.)
+   - Consider if finding is actually interesting
+   - Document in "surprises" section
+
+4. Resource Constraints
+   - If running out of time: prioritize core experiments
+   - If running out of memory: use smaller batch sizes, streaming
+   - If hitting API limits: cache responses, use local models
+   - Document what you couldn't complete
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Remember: Good research is iterative. It's okay to revise your plan based on
+what you learn. But document why you deviated from the original plan.
+
+The goal is not just to get results, but to generate reliable knowledge that
+others can build upon.
+
+═══════════════════════════════════════════════════════════════════════════════
+
+
+================================================================================
+           DOMAIN-SPECIFIC GUIDELINES: MATHEMATICS
+================================================================================
+
+# Mathematics Research Domain Guidance
+
+This template provides specialized guidance for pure and applied mathematics research, including proof construction, theorem development, and mathematical writing.
+
+## Domain Overview
+
+Mathematical research in this context focuses on:
+- Pure mathematics: algebra, analysis, topology, number theory, combinatorics, geometry, logic
+- Applied mathematics: optimization, dynamical systems, probability, mathematical modeling
+- Theorem proving and conjecture exploration
+- Mathematical structure discovery and characterization
+- Computational verification of mathematical results
+
+## How to Interpret Base Methodology for Mathematics
+
+The base researcher template is designed for empirical/experimental research. For mathematics research, interpret each phase as its mathematical equivalent:
+
+| Base Phase | Mathematical Equivalent |
+|---|---|
+| Planning | Proof Strategy — decompose conjecture into sub-lemmas, identify proof approach |
+| Data Collection | Definitions & Prerequisites — establish notation, gather known results |
+| Implementation | Proof Construction — formalize definitions, prove lemmas, build main proof |
+| Experimentation | Computational Verification — test conjectures numerically, generate examples |
+| Analysis | Proof Verification — check logical completeness, test tightness with counterexamples |
+| Documentation | Write-up — theorem statements, complete proofs, discussion of implications |
+
+## Proof Strategies
+
+### Direct Proof
+- Assume hypotheses, derive conclusion through logical steps
+- Best for: implications where the path from hypothesis to conclusion is clear
+- Structure: "Let ... Suppose ... Then ... Therefore ..."
+
+### Proof by Contradiction
+- Assume the negation of what you want to prove, derive a contradiction
+- Best for: showing something cannot exist, uniqueness results, irrationality proofs
+- Structure: "Suppose for contradiction that ... Then ... But this contradicts ... Therefore ..."
+
+### Mathematical Induction
+- **Weak induction**: Prove base case, prove P(n) → P(n+1)
+- **Strong induction**: Prove base case, prove (∀k < n, P(k)) → P(n)
+- **Structural induction**: Induction on recursively defined structures (trees, formulas)
+- **Transfinite induction**: For well-ordered sets beyond natural numbers
+- Best for: statements about natural numbers, recursive structures, sequences
+
+### Proof by Contrapositive
+- To prove P → Q, prove ¬Q → ¬P instead
+- Best for: when the contrapositive direction has a clearer logical flow
+
+### Constructive vs. Non-constructive Proofs
+- **Constructive**: Explicitly build the object claimed to exist
+- **Non-constructive**: Show existence without explicit construction (e.g., pigeonhole, probabilistic method)
+- Prefer constructive proofs when possible — they yield algorithms and examples
+
+### The Probabilistic Method
+- Show that a randomly chosen object has the desired property with positive probability
+- Applications: combinatorics, graph theory, coding theory
+- Key techniques: first moment method, Lovász Local Lemma, alteration method
+
+### Combinatorial Arguments
+- Counting in two ways (double counting)
+- Bijective proofs (establish one-to-one correspondence)
+- Extremal arguments (consider minimal/maximal elements)
+- Pigeonhole principle and generalizations
+
+### Additional Techniques
+- **Diagonalization**: Cantor's method for uncountability, undecidability
+- **Compactness arguments**: Finite character of infinite structures
+- **Algebraic techniques**: Polynomial method, linear algebra method in combinatorics
+- **Topological methods**: Fixed point theorems, Borsuk-Ulam in combinatorics
+
+## Mathematical Writing Standards
+
+### Definition-Theorem-Proof Structure
+Every mathematical result should follow this structure:
+1. **Definitions**: Precisely define all objects and concepts before use
+2. **Theorem statement**: State the result clearly, with all quantifiers explicit
+3. **Proof**: Complete logical argument from hypotheses to conclusion
+4. **Examples**: Illustrate the theorem with concrete cases
+5. **Counterexamples**: Show the hypotheses are necessary (tightness)
+
+### Precise Notation
+- Define notation before first use
+- Use standard notation for standard objects (ℝ, ℤ, ℕ, ∈, ⊂, etc.)
+- Be consistent throughout the document
+- Avoid overloading symbols (one symbol = one meaning)
+- Use quantifiers explicitly: ∀, ∃, followed by the variable and domain
+
+### Logical Structure
+- Every proof step must follow logically from previous steps or stated hypotheses
+- Clearly mark when you invoke a lemma, theorem, or known result
+- Distinguish between "if", "only if", and "if and only if"
+- Be precise about set membership, containment, and equality
+- Handle edge cases and boundary conditions explicitly
+
+### Mathematical Exposition
+- Begin with motivation: why is this result interesting or useful?
+- Provide intuition before formal proofs when helpful
+- Use "we" for collaborative exposition: "We now show that..."
+- Signal proof structure: "The proof proceeds in three steps..."
+- Use remarks to highlight important consequences or connections
+
+## Research Process for Mathematics
+
+### 1. Conjecture Formulation
+- Look for patterns in specific cases and examples
+- Compute small cases by hand or with computer algebra
+- Generalize from known results in related areas
+- Ask: "Is the converse true?", "Can conditions be weakened?", "Does this generalize?"
+
+### 2. Conjecture Testing
+- Test with specific numerical examples
+- Check boundary cases and degenerate cases
+- Search for counterexamples systematically
+- Use computational tools (SymPy, SageMath) for verification
+
+### 3. Proof Development
+- Start with the simplest non-trivial case
+- Identify the key difficulty or insight needed
+- Break complex proofs into lemmas
+- Look for analogies with known proofs in related areas
+- Consider which proof technique is most natural
+
+### 4. Proof Verification
+- Check each logical step independently
+- Verify that all hypotheses are used (if not, the result may be stronger or the proof wrong)
+- Test the proof on examples to catch errors
+- Look for gaps: "Why does this step follow?"
+- Have the proof checked computationally where possible
+
+### 5. Strengthening Results
+- Can hypotheses be weakened?
+- Can the conclusion be strengthened?
+- Are there natural generalizations?
+- What are the tight examples (showing hypotheses are necessary)?
+
+## Computational Support
+
+### When to Use Computational Tools
+- **Conjecture exploration**: Generate examples, compute invariants, search for patterns
+- **Verification**: Check theorem statements against specific cases
+- **Counterexample search**: Systematically test potential counterexamples
+- **Visualization**: Plot functions, graphs, geometric objects for intuition
+- **Symbolic computation**: Simplify expressions, solve equations, compute integrals
+
+### Recommended Tools
+- **SymPy**: Symbolic mathematics in Python — algebra, calculus, number theory, combinatorics
+- **SageMath**: Comprehensive mathematics software — number theory, algebra, graph theory, geometry
+- **NetworkX**: Graph theory computations — graph invariants, algorithms, visualization
+- **NumPy/SciPy**: Numerical computation — linear algebra, optimization, statistics
+- **Matplotlib**: Mathematical visualization — function plots, geometric figures
+
+### Computer-Assisted Proof Techniques
+- Exhaustive case checking (when the number of cases is finite but large)
+- Interval arithmetic for rigorous numerical bounds
+- SAT/SMT solvers for combinatorial problems
+- Certificate-based verification (provide checkable certificates)
+
+## REPORT.md Structure for Mathematics
+
+When writing REPORT.md, use this structure instead of the experiment-oriented default:
+
+1. **Executive Summary**: Brief overview of the mathematical results obtained
+2. **Research Question**: The conjecture or problem being investigated
+3. **Definitions and Notation**: All definitions needed to state and prove results
+4. **Statement of Results**: Theorem and lemma statements (without proofs)
+5. **Proofs**: Complete proofs of all stated results
+6. **Computational Verification**: Results of any computational experiments supporting the theorems
+7. **Discussion**: Implications, connections to other areas, comparison with known results
+8. **Open Questions**: Remaining conjectures, possible generalizations
+9. **Conclusions**: Summary of contributions and future directions
+10. **References**: Mathematical references cited
+
+## Quality Checklist
+
+Before finalizing your work, verify:
+
+- [ ] Every theorem has a complete proof (no gaps or hand-waving)
+- [ ] All definitions are precise and unambiguous
+- [ ] Notation is defined before first use and consistent throughout
+- [ ] Examples illustrate each major definition and theorem
+- [ ] Counterexamples demonstrate tightness of hypotheses where applicable
+- [ ] Quantifiers are explicit (∀, ∃) and correctly ordered
+- [ ] Proof steps follow logically (no "clearly" or "obviously" hiding real work)
+- [ ] Known results are properly cited
+- [ ] Computational verification supports the theoretical claims
+- [ ] Edge cases and boundary conditions are handled
+
+## Common Pitfalls in Mathematical Research
+
+1. **Assuming what you want to prove**: Circular reasoning is the most common error
+2. **Quantifier errors**: Swapping ∀ and ∃, or getting the order wrong
+3. **Missing edge cases**: Forgetting n=0, empty set, degenerate cases
+4. **Unjustified steps**: "It is clear that..." often hides errors
+5. **Incorrect induction**: Wrong base case, or induction step that doesn't actually use the hypothesis
+6. **Division by zero**: Forgetting to check denominators are nonzero
+7. **Convergence issues**: Swapping limits and sums/integrals without justification
+8. **Over-generalization**: Claiming a result holds more broadly than proved
+9. **Notation collision**: Using the same symbol for different things
+10. **Ignoring hypotheses**: Not checking that conditions of cited theorems are satisfied

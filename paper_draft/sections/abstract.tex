@@ -1,0 +1,26 @@
+We study the problem of classifying equational implication over magmas: given
+two equational laws $E$ and $E'$ over a single binary operation, determine whether
+every magma satisfying $E$ also satisfies $E'$.  This question arises at scale in
+the Equational Theories Project, which has verified all $22{,}028{,}942$ pairwise
+implications among $4{,}694$ laws of order at most four.
+
+We present \textsc{predictor4}, a layered decision procedure that replaces two
+unsound or incomplete components of its predecessor with theoretically grounded
+alternatives.  For the positive implication path, Knuth-Bendix (KB) completion
+replaces a bounded breadth-first reachability search, providing a proof procedure
+that is \emph{sound by construction} when it terminates.  For the negative path,
+an SMT-based finite model finder using Z3 replaces a heuristic hill-climbing search,
+providing \emph{completeness} for each fixed domain size.
+
+A central contribution is the identification and formal analysis of a \emph{soundness
+invariant} for KB completion: every rewrite rule $\ell \to r$ in the generated term
+rewriting system must satisfy $\operatorname{vars}(r) \subseteq \operatorname{vars}(\ell)$.
+We prove that violation of this invariant causes all terms to collapse to the same
+normal form, making the normal-form equality test trivially true and producing false
+positives.  We state this as a precise theorem and provide its proof.
+
+Empirical evaluation on stratified samples of 50 and 200 cases from the ground-truth
+implication matrix confirms that \textsc{predictor4}, after enforcing the invariant,
+achieves $100\%$ accuracy with zero false positives and zero false negatives, matching
+its predecessor on both sample sizes while providing strictly stronger theoretical
+guarantees for the positive implication path.

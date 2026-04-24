@@ -1,0 +1,921 @@
+You are an academic paper writer for mathematics. Generate a complete AMS-style
+paper based on the mathematical results provided.
+
+════════════════════════════════════════════════════════════════════════════════
+                         IMPORTANT: BEFORE YOU START
+════════════════════════════════════════════════════════════════════════════════
+
+Before writing any content, you MUST complete these steps:
+
+1. READ THE SKILL: Review the paper-writer skill at .claude/skills/paper-writer/SKILL.md
+2. READ THE STYLE GUIDE: Study templates/paper_writing/lab_style_guide.md carefully
+3. REVIEW AMS SAMPLE: Skim paper_draft/example_paper.tex for LaTeX formatting
+   conventions ONLY — it is the official AMS journal sample file that demonstrates
+   how to use amsart theorem environments, equation formatting, list types,
+   bibliography style, and document structure. It is NOT a real paper and its
+   "content" is purely illustrative (placeholder lemmas, dummy proofs, etc.).
+   Do NOT imitate its content or narrative structure.
+4. REVIEW LANGUAGE STYLE: Browse paper_examples/ for language and exposition patterns
+5. VERIFY COMMAND TEMPLATES: Command templates (math.tex, general.tex, macros.tex)
+   are pre-copied to paper_draft/commands/
+
+CRITICAL: The AMS sample file is a LaTeX formatting reference, not a content template.
+Use it to learn \documentclass{amsart} conventions (theorem/proof environments,
+\bibliographystyle{amsplain}, author/address blocks). Write your own content
+based on the research report below.
+
+════════════════════════════════════════════════════════════════════════════════
+                            RESEARCH REPORT
+════════════════════════════════════════════════════════════════════════════════
+
+# Report: Advanced Hard-Coded Python Classifier for Equational Implication
+
+## 1. Executive Summary
+
+We developed **predictor4**, a new hard-coded Python classifier for equational implication over magmas that replaces two unsound components of its predecessor (predictor3) with theoretically grounded alternatives. Knuth-Bendix (KB) completion replaces the BFS term rewriting engine for the positive implication path, providing a sound proof procedure with no false positives by construction. Z3 SMT model finding replaces heuristic hill-climbing for the negative path, providing completeness guarantees for each fixed magma size.
+
+A critical soundness bug was discovered during evaluation: KB completion was generating rewrite rules with variables not present in the rule&#39;s LHS (e.g., `x → y_0`), making every term reduce to the same normal form and producing false positives. This was fixed by validating that `vars(rhs) ⊆ vars(lhs)` before accepting any rewrite rule.
+
+On stratified samples of 50 and 200 test cases from the 22M-entry Equational Theories Project ground truth, the fixed predictor4 achieves **100% accuracy** matching predictor3 with 0 false positives and 0 false negatives, while providing strictly stronger soundness guarantees for the positive path. KB completion achieves 100% soundness (1/1 correct proofs) on the 200-case sample after the validity fix.
+
+---
+
+## 2. Research Question &amp; Motivation
+
+**Hypothesis**: Replacing BFS term rewriting (positive path) and hill-climbing (negative path) in predictor3 with Knuth-Bendix completion and Z3 SMT model finding, respectively, increases soundness and accuracy of implication classification over magma equational laws.
+
+**Motivation**: predictor3 has two identified soundness gaps:
+1. The BFS engine can spuriously &#34;prove&#34; a FALSE implication when reachable-term sets coincidentally intersect through deep rewrite chains, returning p = 0.9999 incorrectly.
+2. Hill-climbing for magma sizes 3–5 is heuristic and may miss genuine counterexamples, leaving non-implications classified as implications.
+
+These gaps matter for correctness in algebraic reasoning tools. A false positive (claiming law1 |= law2 when it does not) corrupts downstream algebraic reasoning.
+
+**Gap in Prior Work**: No Python classifier for the Equational Theories Project challenge has integrated KB completion or SMT-based model finding as primary proof procedures.
+
+---
+
+## 3. Methodology
+
+### 3.1 Algorithm Design
+
+**predictor4** is a layered decision procedure:
+
+```
+Input: law1, law2 (equational laws over magmas)
+
+1. TRIVIAL CHECKS
+   - Direct pattern specialization → return 0.9999
+   - Trivial law2 (LHS = RHS) → return 0.9999  
+   - Trivial law1 → return 0.0001
+
+2. KNUTH-BENDIX COMPLETION (positive path — SOUND)
+   - Run KB completion on law1 with 0.8s timeout
+   - If convergent TRS found: check NF_R(LHS2) == NF_R(RHS2)
+   - If equal: return 0.9999 (no false positives possible)
+   
+3. BFS REWRITING (positive path — FALLBACK, fast)
+   - BFS expansion of law2 LHS and RHS under law1 rules
+   - If sets intersect: return 0.9999 (may rarely give false positives)
+
+4. LINEAR POLYNOMIAL COUNTEREXAMPLE SEARCH (fast algebraic)
+   - Test in Z/pZ for 15 primes → if violation found: return 0.0001
+
+5. RANDOM POLYNOMIAL EVALUATION (probabilistic)
+   - 640 random multilinear evaluations → if violation found: return 0.0001
+
+6. EXHAUSTIVE FINITE MAGMA SEARCH (sizes 2 and 3)
+   - All 16 size-2 magmas, all 19,683 size-3 magmas (if ≤3 variables)
+   - Named structures: S3, Q8, cyclic groups, affine magmas
+   - If any satisfies law1 but violates law2: return 0.0001
+
+7. Z3 SMT MODEL FINDING (negative path — SOUND, replaces hill-climbing)
+   - Encode &#34;∃ size-n magma: M |= law1 ∧ M ⊭ law2&#34; as SMT query
+   - n = 4 (800ms timeout), n = 5 (600ms timeout)
+   - If Z3 finds solution: return 0.0001 (counterexample verified)
+   - If Z3 returns UNSAT: no counterexample of that size exists
+
+8. STRUCTURAL FEATURE ESTIMATION (fallback heuristic)
+   - Structural feature-based probability (same as predictor3)
+```
+
+### 3.2 KB Completion Implementation
+
+The KB completion module implements the Knuth-Bendix algorithm from scratch in Python (no external KB library exists on PyPI):
+
+- **Term unification**: Robinson&#39;s algorithm with occurs check
+- **Term ordering**: Lexicographic Path Order (LPO) for rule orientation
+- **Critical pair computation**: All overlapping positions between rules
+- **Normal form computation**: Reduce terms to irreducible form under the TRS
+- **Convergence check**: All critical pairs must be joinable
+
+Key robustness features:
+- Step limit (200), rule count limit (40), time limit (0.8s)
+- Term size guard (80 nodes) to prevent exponential blowup
+- Exception handling for RecursionError and LPO orientation failures
+- Variable renaming for disjoint critical pair computation
+- **Soundness guard**: `vars(rhs) ⊆ vars(lhs)` check for every new rule (prevents false positives from invalid &#34;variable LHS&#34; rules)
+
+**Soundness guarantee**: If KB completion returns `success=True` with a convergent TRS R, then `law1 |= law2` iff `NF_R(LHS2) = NF_R(RHS2)` (by the Knuth-Bendix soundness/completeness theorem, Knuth &amp; Bendix 1970). The soundness guard ensures no rule with unbound RHS variables is accepted, which would otherwise collapse all terms to the same normal form.
+
+### 3.3 KB Soundness Bug and Fix
+
+**Bug discovered**: During the 200-case benchmark, KB generated a false positive for:
+- law1: `x = y * ((x * y) * (z * z))`
+- law2: `x = (x * (x * y)) * (z * w)`
+
+**Root cause**: KB completion processed critical pairs and produced an equation `x = y_0` (where `y_0` was a renamed variable from a previous critical pair). LPO ordered this as `x → y_0` (the rule with `x` as LHS). This rule has `vars(rhs) = {y_0} ⊄ vars(lhs) = {x}` — an invalid rewrite rule. When applied during `normal_form`, the rule pattern `x` (a variable) matches any term, reducing everything to `y_0`. Consequently, both `NF_R(LHS2)` and `NF_R(RHS2)` became `y_0`, falsely reporting equality.
+
+**Fix**: Added the check `get_vars(rule_rhs).issubset(get_vars(rule_lhs))` in `add_equation`. If the condition fails, the rule is rejected and KB returns failure (`success=False`) for this equation, preventing the false positive. The case then falls through to BFS/Z3/heuristic.
+
+**Verification**: After the fix, the false positive case returns `kb_prove_implication → None` (inconclusive), and the subsequent negative tests correctly classify it as a non-implication.
+
+### 3.4 Z3 SMT Encoding
+
+For a size-n magma counterexample to law1 |= law2:
+
+```python
+# n×n table of integer variables
+T[i][j] ∈ {0, ..., n-1}
+
+# Law1 must hold universally:
+∀ assignments of vars in law1: eval(law1.LHS) == eval(law1.RHS)
+
+# Law2 must be violated existentially:
+∃ assignment of vars in law2: eval(law2.LHS) != eval(law2.RHS)
+```
+
+Term evaluation uses Z3 `If`-then-else chains for symbolic table lookup:
+```python
+T[left][right] = If(And(left==0, right==0), T[0][0],
+                 If(And(left==0, right==1), T[0][1], ...))
+```
+
+**Completeness guarantee**: For fixed n, Z3 is complete — if no solution exists for that domain size, Z3 will return UNSAT (McKenzie 1971; Z3 DPLL(T) framework).
+
+### 3.5 Tools and Environment
+
+| Tool | Version | Purpose |
+|------|---------|---------|
+| Python | 3.12.8 | Implementation language |
+| z3-solver | 4.16.0 | SMT model finding |
+| sympy | 1.14.0 | Symbolic computation |
+| pandas | 3.0.2 | Data loading |
+| CPU | x86_64 (no GPU) | All computation |
+
+**Reproducibility**: All random seeds fixed (seed=42). No stochastic components in KB or Z3.
+
+---
+
+## 4. Results
+
+### 4.1 Main Accuracy Comparison
+
+**50-case stratified sample** (25 implications, 25 non-implications):
+
+| Metric | predictor3 | predictor4 (fixed) | Δ |
+|--------|-----------|-----------|---|
+| **Accuracy** | 50/50 (100%) | 50/50 (100%) | 0 |
+| **Avg Log-Loss** | -0.0001 | -0.0004 | -0.0003 |
+| **False Positives** | 0 | 0 | 0 |
+| **False Negatives** | 0 | 0 | 0 |
+| **Runtime** | 24.6s (0.49s/case) | 50.7s (1.01s/case) | +2.1× |
+
+**200-case stratified sample** (100 implications, 100 non-implications):
+
+| Metric | predictor3 | predictor4 (fixed) | Δ |
+|--------|-----------|-----------|---|
+| **Accuracy** | 200/200 (100%) | 200/200 (100%) | 0 |
+| **Avg Log-Loss** | -0.0021 | -0.0025 | -0.0004 |
+| **False Positives** | 0 | 0 | 0 |
+| **False Negatives** | 0 | 0 | 0 |
+| **Runtime** | 93.4s (0.47s/case) | 468.2s (2.34s/case) | +5.0× |
+| **KB soundness** | N/A | 1/1 (100%) | — |
+
+Both predictors achieve 100% accuracy on both samples. predictor4 has slightly higher log-loss due to KB timeout cases falling through to slower heuristics. KB proved 1 implication on the 200-case sample, and it was correct (soundness 1.0000).
+
+### 4.2 KB Completion Analysis
+
+From analysis of KB performance on the test cases:
+
+| Outcome | Count |
+|---------|-------|
+| KB proved implication (sound) | ~12% of implication cases |
+| KB timeout/inconclusive → BFS fallback | ~88% of implication cases |
+| KB correctly abstains from non-implications | 100% (0 false positives after fix) |
+
+KB successfully terminates for simple laws (direct specializations, idempotency consequences) but times out for complex 3–4-variable laws where the TRS diverges. The BFS fallback handles the remaining cases.
+
+**Soundness verification**: After the `vars(rhs) ⊆ vars(lhs)` fix, no false positives were generated by the KB component across all 200 tested cases. KB proved 1 implication on the 200-case benchmark, and it was correct (soundness 1.0000).
+
+### 4.3 Z3 Model Finding Analysis
+
+Z3 was invoked only for cases where all other negative tests failed (polynomial checks, exhaustive enumeration). In practice, on this test set:
+
+- Most non-implications were caught by polynomial checks or exhaustive size-2/3 enumeration (&lt; 0.1s)
+- Z3 for n=4, n=5 was only needed for a minority of cases
+- When Z3 found a counterexample, it was always correct (verified by re-checking)
+
+**Completeness gain over hill-climbing**: Z3 is complete for each fixed n — unlike hill-climbing which is heuristic. Any counterexample of size ≤5 that exists WILL be found (given sufficient time).
+
+### 4.4 Soundness Improvement (Qualitative)
+
+The key soundness gap in predictor3 — BFS producing false proofs — is addressed:
+
+**Scenario eliminated**: In predictor3, BFS may find a reachable-term intersection purely by coincidental term structure collision, returning 0.9999 for a false implication. In predictor4, KB completion is run first and provides an independent higher-confidence proof when it succeeds — but only if the proof is genuinely sound (verified by the `vars(rhs) ⊆ vars(lhs)` guard).
+
+**Why this matters**: The ETP ground truth shows 13.8M non-implications. Any false positive incorrectly labels a non-implication as an implication. The KB-first approach reduces this risk for the ~12% of cases where KB terminates.
+
+### 4.5 Log-Loss Analysis
+
+The slight log-loss degradation (-0.0003/case) in predictor4 vs predictor3 is due to cases where:
+1. KB times out (cannot generate the strongest signal 0.9999)
+2. BFS falls through to structural estimation (returns 0.8–0.95 instead of 0.9999)
+
+This represents a soundness-accuracy tradeoff: KB&#39;s 0.8s timeout means some cases that BFS would confidently classify (even if unsoundly) are handled more conservatively.
+
+---
+
+## 5. Discussion
+
+### 5.1 Main Finding
+
+**predictor4 achieves identical empirical accuracy to predictor3 (100% on 50 stratified samples) while providing strictly stronger theoretical soundness guarantees for the positive implication path.** The key improvement is that KB-proved implications carry a formal correctness guarantee absent from BFS-proved implications.
+
+### 5.2 The Soundness-Accuracy Tradeoff
+
+The results reveal an important tradeoff: BFS is faster and more confident (returns 0.9999) for most positive implications, while KB is slower but provides a sound proof. The two-tier approach (KB first, then BFS fallback) preserves accuracy while providing a KB-backed proof for ~12% of cases.
+
+### 5.3 Comparison to Prior Work
+
+| Component | predictor3 | predictor4 | Status |
+|-----------|-----------|-----------|--------|
+| Positive proof | BFS (unsound, fast) | KB + BFS (sound + fallback) | Improved |
+| Negative search (n≤3) | Exhaustive (sound) | Exhaustive (sound) | Same |
+| Negative search (n=4,5) | Hill-climbing (heuristic) | Z3 SMT (complete) | Improved |
+| Algebraic tests | Polynomial eval (sound) | Polynomial eval (sound) | Same |
+| Fallback | Structural heuristic | Structural heuristic | Same |
+
+### 5.4 The Z3 Completeness Advantage
+
+Z3&#39;s most important property is completeness: if no size-n counterexample exists, Z3 confirms this (given enough time). Hill-climbing may simply stop without confirmation. This means predictor4 can make stronger &#34;likely implication&#34; statements for cases where Z3 returns UNSAT for n=4,5 — evidence that no small counterexample exists.
+
+### 5.5 Limitations
+
+1. **KB termination**: KB completion times out for ~88% of complex law pairs. The BFS fallback maintains accuracy but loses the soundness guarantee for those cases.
+2. **Z3 timeout**: Z3 with short timeouts (600–800ms) may return UNKNOWN rather than SAT/UNSAT for complex laws at n=5 with 4 variables (5^4 = 625 assignments).
+3. **Austin (1979)**: Some implications hold over all finite magmas but fail for infinite ones. Z3 (finite model finder) cannot detect these genuine infinite non-implications.
+4. **Runtime overhead**: predictor4 runs ~2× slower than predictor3 (1.01s vs 0.49s per case) due to KB timeout overhead for inconclusive cases.
+
+---
+
+## 6. Conclusions &amp; Next Steps
+
+### 6.1 Answer to Research Question
+
+**H1 (KB proves more implications)**: Confirmed for ~12% of test cases — KB provides a sound proof where BFS provides only evidence.
+
+**H2 (Z3 finds more counterexamples)**: Confirmed in principle — Z3 is complete for fixed n while hill-climbing is heuristic. On this test set, most counterexamples were already caught by polynomial checks and size-2/3 exhaustive enumeration.
+
+**H3 (predictor4 achieves higher accuracy)**: Equal accuracy (100% on both 50 and 200 cases). No regression, no improvement on these test sets.
+
+**H4 (eliminates false positives)**: Confirmed after the soundness fix — KB generates no false positives. The `vars(rhs) ⊆ vars(lhs)` invariant is now enforced, ensuring no invalid rewrite rule enters the TRS.
+
+### 6.2 Practical Implications
+
+1. **Sound proof mode**: When KB terminates (after fix), the resulting proof is formal and certifiable.
+2. **Complete counterexample mode**: Z3 for n≤5 provides completeness guarantees missing from hill-climbing.
+3. **Deployment path**: predictor4 is a drop-in replacement for predictor3, maintaining the same API.
+
+### 6.3 Recommended Next Steps
+
+1. **Longer KB timeout**: Increase from 0.8s to 2–3s with multiprocessing to handle more complex laws.
+2. **Z3 for larger n**: Extend to n=6, 7 (with longer timeouts) to catch more counterexamples.
+3. **Equivalence class caching**: Laws in the same equivalence class have identical implication sets — cache KB results per class.
+4. **Better LPO orders**: Try multiple variable orderings in KB to increase termination rate.
+5. **Lean proof export**: KB&#39;s convergent TRS provides a machine-checkable proof — could generate Lean 4 proofs for the ETP formalization.
+
+---
+
+## 7. References
+
+1. M. Bolan, J. Breitner, et al. (including T. Tao, M. Carneiro). *The Equational Theories Project*. arXiv:2512.07087v2, 2025.
+2. D. Knuth, P. Bendix. *Simple Word Problems in Universal Algebras*. Pergamon Press, 1970.
+3. T. Sternagel, R. Thiemann, H. Zankl, C. Sternagel. *Recording Completion for Finding and Certifying Proofs in Equational Logic*. arXiv:1208.1597v1, 2012.
+4. F. Baader, T. Nipkow. *Term Rewriting and All That*. Cambridge University Press, 1999.
+5. L. de Moura, N. Bjørner. *Z3: An Efficient SMT Solver*. TACAS 2008.
+6. G. Birkhoff. *On the Structure of Abstract Algebras*. Mathematical Proceedings, 1935.
+7. R. McKenzie. *On spectra and the negative solution of the decision problem for identities having a finite non-trivial model*. Journal of Symbolic Logic, 1971.
+8. T. Austin. *Equational theories*. PhD thesis, Vanderbilt University, 1979.
+
+
+════════════════════════════════════════════════════════════════════════════════
+                            RESEARCH PLAN
+════════════════════════════════════════════════════════════════════════════════
+
+# Planning: Advanced Hard-Coded Python Classifier for Equational Implication
+
+## Motivation &amp; Novelty Assessment
+
+### Why This Research Matters
+Equational implication classification over magmas is a foundational problem in universal algebra and automated theorem proving. The Equational Theories Project verified 22M pairwise implications with formal Lean proofs; a fast, sound Python classifier enables rapid hypothesis testing and serves as a practical tool for algebraic research. Sound classification is critical: a false positive (claiming law1 |= law2 when it does not) corrupts downstream algebraic reasoning.
+
+### Gap in Existing Work
+predictor3&#39;s BFS engine can spuriously &#34;prove&#34; false implications when reachable-term sets collide through deep rewrite chains, returning 0.9999 incorrectly for non-implications. Its hill-climbing (sizes 3-5) is heuristic and misses counterexamples requiring larger magmas. Both represent unsound or incomplete components that compromise correctness.
+
+### Our Novel Contribution
+Replace BFS with Knuth-Bendix (KB) completion (sound, complete for the word problem when it terminates) and replace hill-climbing with Z3 SMT model finding (complete for each fixed domain size n). These are well-established sound procedures not previously integrated into Python-based equational implication classifiers.
+
+### Experiment Justification
+- **KB completion**: Proves positive implications via normal form comparison under a convergent TRS — no false proofs possible.
+- **Z3 model finding**: Finds counterexamples or proves none exists for given n — complete for each fixed n.
+- **Accuracy benchmark**: Evaluate on 200 random triples from the ground truth matrix to measure improvement over predictor3 baseline.
+
+---
+
+## Research Question
+Does replacing BFS term rewriting with Knuth-Bendix completion (positive path) and hill-climbing with Z3 SMT model finding (negative path) increase soundness and classification accuracy for equational implication over magmas?
+
+## Hypothesis Decomposition
+1. H1: KB completion proves strictly more positive implications than BFS (KB is complete when it terminates; BFS is bounded).
+2. H2: Z3 model finding finds strictly more counterexamples than hill-climbing for fixed sizes (Z3 is complete for each n; hill-climbing is heuristic).
+3. H3: The combined predictor4 achieves higher accuracy and lower log-loss than predictor3 on random samples from the full 22M matrix.
+4. H4: predictor4 eliminates false positives (spurious implications) in the BFS-collision cases identified in error analysis.
+
+## Proposed Methodology
+
+### Approach
+1. Implement KB completion in Python (no external library exists):
+   - Term unification (Robinson&#39;s algorithm)
+   - LPO term ordering for rule orientation
+   - KB completion loop with step/time limit
+   - Normal form computation under convergent TRS
+
+2. Integrate Z3 SMT model finding:
+   - Encode magma table as integer variables in Z3
+   - Universal quantification over all variable assignments (explicit)
+   - For n = 4, 5, 6 (exhaustive covers n=2, n=3 already)
+   - Replace hill-climbing section in generate_magmas()
+
+3. Compose predictor4:
+   - Keep all of predictor3&#39;s components (parsing, trivial checks, linear polynomial, random polynomial, exhaustive enumeration)
+   - Replace BFS with KB completion (with BFS fallback on timeout)
+   - Replace hill-climbing with Z3 (with graceful timeout handling)
+   - Keep structural feature probability estimation as fallback
+
+### Evaluation Metrics
+- **Accuracy**: fraction of 200 random samples correctly classified (threshold 0.5)
+- **Log-loss**: sum of log-likelihood values (higher = better)
+- **False positive rate**: fraction of non-implications classified with p &gt; 0.5
+- **False negative rate**: fraction of true implications classified with p &lt; 0.5
+
+### Success Criteria
+- predictor4 accuracy ≥ predictor3 accuracy on the same test set
+- predictor4 log-loss ≥ predictor3 log-loss
+- Zero false positives from KB (verified by construction)
+
+## Timeline
+- Phase 1 (Planning): complete
+- Phase 2 (Implementation): ~90 min — KB completion, Z3 integration, predictor4.py
+- Phase 3 (Testing): ~30 min — run on 200 random samples, compare with predictor3
+- Phase 4 (Analysis): ~20 min — examine error cases, compute metrics
+- Phase 5 (Documentation): ~20 min — REPORT.md, README.md
+
+## Potential Challenges
+- KB completion may diverge for complex laws → mitigate with step/time limit
+- Z3 encoding for 4-variable laws at n=5 may be slow (5^4 = 625 assignments) → time limit
+- LPO may fail to orient some equations → detect and skip (KB fails gracefully)
+
+
+════════════════════════════════════════════════════════════════════════════════
+                          LITERATURE REVIEW
+════════════════════════════════════════════════════════════════════════════════
+
+# Literature Review: Advanced Hard-Coded Python Classifier for Equation Theory
+
+## Research Area Overview
+
+This project targets the **equational implication problem over magmas**: given equational laws `law1` and `law2` over a single binary operation `*`, determine whether every magma satisfying `law1` also satisfies `law2`. Formally, `law1 |= law2` iff for all magmas M: `M |= law1 ⟹ M |= law2`.
+
+The **Equational Theories Project (ETP)** established the complete ground truth: 4,694 equational laws of order ≤ 4 (at most 4 applications of `*`) with all 22,028,942 pairwise implications determined and verified in Lean. The hypothesis for this project is that replacing BFS term rewriting (positive implication) and hill-climbing search (negative implication) in predictor3 with **Knuth-Bendix (KB) completion** and **SMT model finding (Z3)**, respectively, will increase soundness and accuracy.
+
+---
+
+## Key Definitions
+
+**Definition (Magma):** A set M with a binary operation `◇: M × M → M` (no other axioms).
+
+**Definition (Equational Law):** An identity `L = R` where L, R are terms over variables and `◇`. E.g., `x * (y * z) = (x * y) * z` (associativity).
+
+**Definition (Implication):** `E |= E&#39;` iff every magma satisfying `E` also satisfies `E&#39;`. The relation is a preorder; `x = y` (singleton) is minimum and `x = x` (trivial) is maximum.
+
+**Definition (Term Rewrite System, TRS):** A set of directed equations `ℓ → r` used for rewriting terms. A TRS R is:
+- **Terminating**: no infinite rewrite sequences exist
+- **Confluent**: all terms have a unique normal form
+- **Convergent**: both terminating and confluent
+
+**Definition (Knuth-Bendix Completion):** An algorithm that takes an equational system E and a reduction order `&gt;` and attempts to transform E into an equivalent convergent TRS R. When successful, R is a decision procedure for the word problem: `s ↔*_E t` iff the R-normal forms of s and t coincide.
+
+**Definition (Critical Pair):** For two rules `ℓ₁ → r₁` and `ℓ₂ → r₂` in R (with disjoint variables), if some subterm of `ℓ₁` unifies with `ℓ₂` via unifier σ, then `(r₁σ, ℓ₁σ[r₂σ]_p)` is a critical pair. R is locally confluent iff all critical pairs are joinable (Huet 1980).
+
+**Definition (Lexicographic Path Order, LPO):** A reduction order on terms. `s &gt;_LPO t` if `s` is structurally larger than `t` according to a precedence on function symbols. For magma terms with a single `*`, LPO reduces to a variable-based ordering. Used to orient equations in KB completion.
+
+**Definition (SMT Finite Model Finding):** Using an SMT solver (e.g., Z3) to decide if there exists a finite algebraic structure (here: a magma of size n) satisfying given equational constraints. The magma table `T[i][j] ∈ {0,...,n-1}` is encoded as integer variables; law evaluation uses If-then-else chains for symbolic table lookup.
+
+**Definition (Ground Truth Encoding):** In `raw_implications.csv`, each entry is an integer: `+3`/`+4` = proven implication (by two different proof methods), `-3`/`-4` = proven non-implication.
+
+---
+
+## Key Papers
+
+### Paper 1: The Equational Theories Project (ETP)
+
+- **Authors**: Matthew Bolan, Joachim Breitner, et al. (including Terence Tao, Mario Carneiro)
+- **Year**: December 2025 (arXiv:2512.07087v2)
+
+**Main Results:**
+- Complete determination of all 22,028,942 pairwise implications among 4,694 equational laws of order ≤ 4, verified in Lean 4.
+- 8,178,279 positive implications (37.1%); 13,855,357 non-implications (62.9%).
+- 4,694 laws form 1,415 equivalence classes; 1,496 laws are equivalent to the singleton law (E2).
+- CNN baseline (5-layer 1D CNN, character tokenization): **99.7% accuracy** on full 22M matrix.
+
+**Proof Automation Techniques (Section 7):**
+- **Automated Theorem Provers**: Vampire, Prover9 (superposition/saturation), Duper.
+- **Equational Reasoning**: MagmaEgg (ATP for magmas using the egg e-graph library).
+- **Counterexample Search**: Mace4 (finite model finder), searching magmas of size ≤ 6–8.
+- **SMT**: Z3 used for some implications, confirming Z3&#39;s applicability to this domain.
+
+**Relevance to Our Research:** Ground truth source; defines evaluation methodology (log-loss on full 22M matrix); confirms Z3 and finite magma search are state-of-the-art for this problem.
+
+---
+
+### Paper 2: Recording Completion for Finding and Certifying Proofs in Equational Logic
+
+- **Authors**: Thomas Sternagel, René Thiemann, Harald Zankl, Christian Sternagel
+- **Year**: 2012 (arXiv:1208.1597v1)
+- **File**: `papers/recording_completion_equational_logic_Sternagel2012.pdf`
+
+**Main Results:**
+- Introduces *recording completion*: KB completion extended with a history component H that records how each rule in R was derived from E.
+- From a join `s →*_R ·*_R← t`, the recall phase reconstructs a conversion `s ↔*_E t`, providing explicit proofs.
+- **Theorem 1**: Every successful run of recording completion is sound (R is convergent and equivalent to E).
+- **Theorem 2**: A TRS over `T(F, String)` is locally confluent iff all critical pairs are joinable.
+- Implemented in IsaFoR/CeTA (certified completion). KBCV and MKBTT are tools that produce certifiable KB proofs.
+- Inference rules: deduce, orientl, orientr, simplifyl, simplifyr, delete, compose, collapse.
+
+**Key Technical Insight:** For finite KB runs (the only case relevant to our bounded search), the strict encompassment condition in the collapse rule is not required. This simplifies implementation.
+
+**Relevance to Our Research:** Core reference for the KB completion implementation. The three-phase structure (record → compare → recall) directly maps to our use case: run KB on `law1`, check if `law2`&#39;s LHS and RHS have the same R-normal form. We do not need the recall (proof reconstruction) phase — only the record (convergent TRS construction) and compare (normal form check) phases.
+
+---
+
+### Paper 3: Equational Theories and Validity for Logically Constrained Term Rewriting (Full Version)
+
+- **Year**: 2024 (arXiv:2405.01174v3)
+- **File**: `papers/equational_theories_validity_constrained_rewriting_2024.pdf`
+
+**Main Results:**
+- Extends equational validity to logically constrained TRS (rules equipped with side conditions from an arbitrary theory).
+- Provides decision procedures for equational validity in constrained rewriting: reduces to SMT queries.
+- Establishes connection between equational theories and constraint satisfaction.
+
+**Relevance to Our Research:** Background on the SMT-equational theory interface. Confirms that SMT-based model finding is theoretically grounded for equational implication checking.
+
+---
+
+## Known Results (Prerequisite Theorems)
+
+**Theorem (Birkhoff Completeness, 1935):** `E |= E&#39;` iff there is an equational derivation from E proving E&#39;. For term rewriting: `E |= (s = t)` iff `s ↔*_E t` (the two sides are connected by a finite sequence of equational rewrites).
+
+**Implication for KB:** When KB completion of E terminates with convergent TRS R, `E |= (s = t)` iff `NF_R(s) = NF_R(t)` (their R-normal forms are equal). This is a **complete decision procedure** for the word problem relative to E.
+
+**Theorem (Knuth-Bendix Completion, 1970):** Given an equational system E and a reduction order `&gt;`, KB completion either:
+1. Succeeds: produces a convergent TRS R equivalent to E (then R decides `s ↔*_E t`), or
+2. Fails: produces a non-orientable equation (indicates the procedure failed with this order), or
+3. Diverges: runs forever (this must be bounded in practice).
+
+**Theorem (Critical Pair Lemma, Knuth-Bendix 1970 / Huet 1980):** A TRS R (with infinite variable set) is locally confluent iff all its critical pairs are joinable. By Newman&#39;s Lemma, if R is also terminating, then locally confluent ⟺ confluent.
+
+**Theorem (Undecidability, McKenzie 1971):** Whether `E |= E&#39;` is undecidable in general (for unrestricted magma laws). For the fixed set of 4,694 laws of order ≤ 4, the ETP has resolved all cases.
+
+**Theorem (Austin 1979):** `|=_fin` (implication over all finite magmas) is strictly weaker than `|=`. There exist laws E, E&#39; such that every finite magma satisfying E also satisfies E&#39;, but some infinite magma does not.
+
+**Theorem (Z3 Completeness for Finite Domains):** For any fixed domain size n, Z3 can decide in finite time whether a satisfying assignment to integer variables exists (DPLL(T) framework). Hence, for each fixed n, Z3 is a complete procedure for finding n-element magma counterexamples.
+
+**Key Statistics (Ground Truth):**
+- 4,694 laws × 4,694 laws = 22,028,942 pairs (diagonal excluded)
+- Positive implications: 8,178,279 (37.1%)
+- Non-implications: 13,855,357 (62.9%)
+- CNN baseline: 99.7% accuracy on full matrix
+
+---
+
+## Proof Techniques in the Literature
+
+### Technique 1: BFS Term Rewriting (predictor3, predictor2, predictor1)
+
+- **Method**: Breadth-first search expanding terms reachable from law2&#39;s LHS and RHS under law1&#39;s rewrite rules. If sets intersect, implication proven.
+- **Strength**: Sound and fast for short proofs.
+- **Weakness**: Incomplete (bounded search may miss long proofs); does not use the full congruence structure of law1.
+- **In predictor3**: `bfs_expand` with limit 550, `MAX_TERM_DEPTH = 15`.
+
+### Technique 2: Knuth-Bendix Completion (proposed replacement for BFS)
+
+- **Method**: Apply KB completion to law1 (as a single equation, symmetric). If it produces a convergent TRS R, check if `NF_R(LHS of law2) = NF_R(RHS of law2)`.
+- **Strength**: Complete for the word problem when it terminates. Fundamentally more powerful than BFS — it computes the full equational closure.
+- **Weakness**: May not terminate (must use time/step limit). The convergent TRS may be large (many rules).
+- **Key tools**: KBCV, MKBTT (not in Python). Must implement KB completion in Python.
+- **Implementation**: See `code/README.md` for design notes.
+- **Expected gain**: Correctly proves some implications that BFS misses (long rewrite chains, indirect consequences).
+
+### Technique 3: Exhaustive Finite Magma Enumeration (predictor3)
+
+- **Method**: Enumerate many structured finite magmas (all 3^9 = 19,683 size-3 magmas, S3, Q8, etc.) and check if any satisfies law1 but not law2.
+- **Strength**: High coverage; size-3 exhaustive enumeration catches most common counterexamples.
+- **Weakness**: Hill-climbing for size 4–5 magmas is heuristic; may miss counterexamples.
+
+### Technique 4: Z3 SMT Model Finding (proposed replacement for hill-climbing)
+
+- **Method**: Encode &#34;find a size-n magma satisfying law1 but not law2&#34; as an SMT problem. Z3 either finds a counterexample or proves none exists (for that domain size n).
+- **Strength**: **Complete** for each fixed n — no false negatives for counterexamples of that size. Sound by construction (any returned table is a verified counterexample).
+- **Weakness**: Slower than heuristic search for larger n (constraint size grows as n^(n²+|vars|)).
+- **Performance**: Verified working for n=3, n=4 in under 1 second for 2-variable laws.
+- **Encoding**: Table T[i][j] as integer variables in [0,n); law evaluation as If-then-else chain; universal quantification over all variable assignments (explicit); existential violation as `Or([...])`.
+
+### Technique 5: Linear Polynomial Counterexample Search (predictor3, retain)
+
+- **Method**: Evaluate law1 and law2 in commutative polynomial rings Z/pZ. If law1 holds but law2 fails in any ring evaluation, non-implication is proven.
+- **Strength**: Very fast algebraic check covering a broad class of counterexamples.
+- **Retain**: Yes — this is an efficient complement to Z3 (different class of models).
+
+### Technique 6: Random Polynomial Evaluation over Large Primes (predictor3, retain)
+
+- **Method**: Evaluate laws under random multilinear maps over large primes (640 evaluations). If law1 holds but law2 fails, non-implication proven.
+- **Strength**: Probabilistically powerful; provides a soft implication signal.
+- **Retain**: Yes.
+
+### Technique 7: Structural Feature Heuristics (predictor3, retain)
+
+- **Method**: When no counterexample found and implication not proven, use structural features (variable counts, subterm similarity, law type, canonical signature similarity) to estimate implication probability.
+- **Retain**: Yes, as the fallback probability estimator.
+
+---
+
+## Relationship Between KB Completion and BFS Rewriting
+
+BFS rewriting in predictor3 is essentially a **bounded approximation** to KB completion:
+
+| Aspect | BFS (predictor3) | KB Completion (proposed) |
+|--------|-----------------|--------------------------|
+| Completeness | Incomplete (bounded) | Complete when it terminates |
+| Method | Expand law2&#39;s LHS/RHS reachable set | Build convergent TRS from law1 |
+| Proof | Implicit (intersection found) | Explicit (normal forms equal) |
+| Termination | Always (bounded by limit) | May diverge |
+| Complexity | O(limit × rewrite_fanout) | Potentially exponential |
+| Python impl | Available in predictor3 | Must implement from scratch |
+
+**Key improvement**: KB completion can prove implications that require arbitrarily long rewrite chains from law2&#39;s LHS to law2&#39;s RHS, whereas BFS is bounded. For example, if law1 = `x*(y*z) = (x*y)*z` (associativity), KB completion of E = {associativity} produces R = {left or right association rule}, enabling normal form comparison. BFS may miss implications requiring &gt; 550 steps.
+
+---
+
+## Relationship Between Z3 and Hill-Climbing
+
+| Aspect | Hill-climbing (predictor3) | Z3 Model Finding (proposed) |
+|--------|--------------------------|------------------------------|
+| Completeness | Heuristic (may miss) | Complete for fixed domain size n |
+| Method | Stochastic gradient descent on violations | DPLL(T) constraint solving |
+| Soundness | High (verified tables) | Exact (formal guarantee) |
+| Speed | Fast per restart | Moderate (depends on encoding) |
+| Size range | n = 3, 4, 5 | n = 2, 3, 4, 5, 6 (tested) |
+| False negatives | Possible | None for given n |
+
+**Key improvement**: Z3 provides **completeness guarantees** for fixed n. A failed Z3 query means no counterexample of size n exists, giving stronger evidence for implication. Hill-climbing may terminate without finding a counterexample that exists.
+
+---
+
+## Implementation Plan for KB Completion
+
+Based on Baader &amp; Nipkow (1999) and Knuth &amp; Bendix (1970):
+
+### 1. Term Ordering (LPO for magma terms)
+For magma terms over a single binary operator `*`, a simple effective ordering:
+- Variables are ordered by name: `x &gt; y &gt; z &gt; ...` (alphabetically decreasing)
+- `s * t &gt; u` if `s ≥ u` or `t ≥ u` (the subterm property)
+- `s * t &gt; u * v` if (s,t) &gt;`_lex` (u,v) after considering all cases
+
+For single-equation systems (single law), the only equations to orient are the law itself and critical pairs arising from overlapping rules. LPO can be used to orient rules; if LPO cannot orient an equation in either direction, KB fails for that ordering.
+
+### 2. Unification for Critical Pair Computation
+Standard first-order unification (Robinson&#39;s algorithm) to find overlaps between rule LHSs.
+
+### 3. KB Inference Rules (simplified for single-equation input):
+```
+E = {law1}  (symmetric: both law1 and its reverse)
+Loop:
+  1. Orient all equations in E using LPO → add to R
+  2. For all pairs of rules in R, compute critical pairs
+  3. Reduce each critical pair by R (rewrite to normal form)
+  4. If normal forms differ: add as new equation to E
+  5. If normal forms equal: discard (this pair is joinable)
+  6. Repeat until E is empty (success) or time/step limit (inconclusive)
+```
+
+### 4. Normal Form Computation
+Given convergent TRS R, reduce a term by applying rules in R until no rule applies.
+
+### 5. Bound Strategy
+Use step limit (e.g., 200 KB steps) and term depth limit (e.g., depth ≤ 20) to prevent divergence.
+
+---
+
+## Gaps and Opportunities
+
+**Gap 1 — KB completion for single-equation equational systems:**
+Most KB completion implementations and papers focus on multi-equation systems (groups, rings, etc.). Single-equation systems (one magma law) often terminate quickly or produce small TRSs, making them tractable.
+
+**Gap 2 — Z3 encoding efficiency:**
+The If-then-else chain encoding has quadratic constraint size in n (n² table variables × n^|vars| universal quantification). For n=5, 4-variable laws have 5^4 = 625 assignments × 25 table constraints — still tractable for Z3.
+
+**Gap 3 — Integration threshold:**
+When to invoke KB vs. fall back to BFS? Suggested strategy: try KB with a 1-second timeout; if it terminates and proves implication, return high confidence; if timeout, fall back to BFS behavior.
+
+**Gap 4 — Z3 vs. exhaustive size-3 enumeration:**
+For size 3, all 19,683 tables can be enumerated in ~0.1s in Python. Z3 is slower for size 3 than exhaustive enumeration. Strategy: keep exhaustive enumeration for n=2 and n=3; use Z3 for n=4 and n=5 (where exhaustive is infeasible).
+
+---
+
+## Recommendations for Proof Strategy
+
+1. **For positive implication (law1 |= law2):**
+   - First: try direct specialization (law2 is a substitution instance of law1)
+   - Second: run KB completion on law1 with 1-second timeout
+   - If KB succeeds and `NF_R(LHS2) = NF_R(RHS2)`: return 0.9999
+   - If KB times out: fall back to BFS (predictor3&#39;s `bfs_expand`)
+
+2. **For negative implication (law1 ⊭ law2):**
+   - First: linear polynomial check (fast algebraic counterexample)
+   - Second: random polynomial evaluation over large primes
+   - Third: exhaustive enumeration for n=2, n=3
+   - Fourth: Z3 model finding for n=4 and n=5 (complete for these sizes)
+   - If any check finds a counterexample: return 0.0001
+
+3. **Fallback probability estimation:**
+   - If neither proven nor disproven: use structural features + coverage ratio
+   - Same framework as predictor3 (adjusted adj factors based on results)
+
+4. **Expected accuracy improvement over predictor3:**
+   - KB completion catches long-chain implications that BFS misses
+   - Z3 (complete for n=4, n=5) catches counterexamples that hill-climbing misses
+   - Together: should improve log-loss more than accuracy (by increasing confidence)
+
+
+════════════════════════════════════════════════════════════════════════════════
+                          PAPER REQUIREMENTS
+════════════════════════════════════════════════════════════════════════════════
+
+Generate a complete mathematics paper with the following structure:
+
+1. TITLE
+   - Clear, specific, informative
+   - Should convey the main result or the mathematical objects studied
+   - Mathematical convention: concise and precise
+
+2. AUTHOR
+   - Use this exact author line: Andrew Ren and NeuriCo
+
+3. ABSTRACT (150-250 words)
+   - State the problem or question investigated
+   - Summarize the main results (theorem statements in words)
+   - Mention proof techniques used
+   - Note any computational verification
+
+4. INTRODUCTION
+   - Mathematical problem and motivation
+   - History and context of the problem
+   - Summary of known results (with citations)
+   - Statement of main contributions (informal preview)
+   - Paper organization
+
+5. PRELIMINARIES
+   - Notation and conventions
+   - Definitions needed for the paper
+   - Prerequisite results (stated with citations, not reproved)
+   - This section ensures the paper is self-contained
+
+6. MAIN RESULTS
+   - Formal theorem statements
+   - Complete proofs
+   - Supporting lemmas and propositions with proofs
+   - Examples illustrating the results
+   - Remarks connecting to other areas
+
+7. DISCUSSION
+   - Implications of the results
+   - Connections to related problems
+   - Open questions and conjectures
+   - Possible generalizations
+
+8. CONCLUSION
+   - Summary of contributions
+   - Future directions
+
+9. REFERENCES
+   - BibTeX format
+   - All cited papers and textbooks
+
+════════════════════════════════════════════════════════════════════════════════
+                          OUTPUT FORMAT
+════════════════════════════════════════════════════════════════════════════════
+
+Create a MODULAR LaTeX project with the following directory structure:
+
+paper_draft/
+├── main.tex              # Main file that imports all sections
+├── references.bib        # BibTeX references
+├── sections/
+│   ├── abstract.tex      # Abstract content
+│   ├── introduction.tex  # Introduction section
+│   ├── preliminaries.tex # Definitions, notation, prerequisites
+│   ├── main_results.tex  # Theorems and proofs
+│   ├── discussion.tex    # Discussion and open questions
+│   └── conclusion.tex    # Conclusion section
+├── figures/              # Directory for any generated figures
+└── appendix/             # Directory for appendix sections (if needed)
+
+INSTRUCTIONS:
+1. First, create the directory structure above (mkdir -p paper_draft/sections paper_draft/figures paper_draft/appendix)
+2. Write main.tex using the AMS document class with proper theorem environments:
+
+   \documentclass{amsart}
+   \usepackage{amsmath,amssymb,amsthm}
+   \usepackage[hidelinks]{hyperref}
+   \usepackage{graphicx}
+   \usepackage{enumitem}
+
+   % Theorem environments
+   \newtheorem{theorem}{Theorem}[section]
+   \newtheorem{lemma}[theorem]{Lemma}
+   \newtheorem{proposition}[theorem]{Proposition}
+   \newtheorem{corollary}[theorem]{Corollary}
+   \newtheorem{conjecture}[theorem]{Conjecture}
+
+   \theoremstyle{definition}
+   \newtheorem{definition}[theorem]{Definition}
+   \newtheorem{example}[theorem]{Example}
+
+   \theoremstyle{remark}
+   \newtheorem{remark}[theorem]{Remark}
+
+   % Import command files (if they exist)
+   \InputIfFileExists{commands/math}{}{}
+   \InputIfFileExists{commands/general}{}{}
+   \InputIfFileExists{commands/macros}{}{}
+
+   % Bibliography style
+   \bibliographystyle{amsplain}
+
+   \author{Andrew Ren and NeuriCo}
+
+   - Use \input{sections/...} to include each section
+   - Use \bibliography{references} for references
+3. Write each section file with COMPLETE content (no placeholders)
+4. Each section file should include its \section{} command
+5. Write references.bib with all citations in BibTeX format
+6. After writing all files, compile the paper:
+   cd paper_draft && pdflatex -interaction=nonstopmode main.tex && bibtex main && pdflatex -interaction=nonstopmode main.tex && pdflatex -interaction=nonstopmode main.tex
+
+NOTE ON DOCUMENT CLASS:
+- Use \documentclass{amsart} (NOT \documentclass{article} with \usepackage{style})
+- The amsart class is part of the standard LaTeX distribution — no .sty file needed
+- It provides proper formatting for mathematical papers: theorem numbering,
+  proof environments, AMS math fonts, and standard math journal layout
+
+This modular structure allows humans to easily:
+- Edit individual sections without navigating a large file
+- Track changes per section
+- Reuse sections across different paper versions
+
+════════════════════════════════════════════════════════════════════════════════
+                          QUALITY REQUIREMENTS
+════════════════════════════════════════════════════════════════════════════════
+
+- Academic mathematical tone throughout
+- Every theorem must have a complete proof
+- All definitions must be precise and unambiguous
+- Proper citations using \cite{} commands
+- NO placeholder text - every section must have real content
+- The paper MUST compile without errors
+- If compilation fails, debug and fix the LaTeX errors
+
+════════════════════════════════════════════════════════════════════════════════
+                       MATHEMATICAL WRITING STYLE
+════════════════════════════════════════════════════════════════════════════════
+
+Follow these conventions for mathematical papers:
+
+1. LANGUAGE STYLE:
+   - Use "we" for collaborative exposition: "We prove", "We show", "We define"
+   - Be precise and direct: state results clearly before proving them
+   - Prefer plain language: "We now prove..." over "We shall henceforth demonstrate..."
+   - Use the present tense for mathematical facts: "Theorem 1 shows..."
+   - Avoid vague language: instead of "clearly" or "obviously", explain why
+
+2. INTRODUCTION STRUCTURE:
+   - Context and motivation (why this problem matters)
+   - History (what's known, with citations)
+   - Statement of results (informal but precise)
+   - Proof techniques (brief overview of methods)
+   - Paper organization (roadmap)
+
+3. THEOREM ENVIRONMENTS:
+   Use proper LaTeX theorem environments:
+   \begin{theorem}\label{thm:main}
+     Let $G$ be a graph with $n$ vertices. Then...
+   \end{theorem}
+
+   \begin{proof}
+     We proceed by induction on $n$. ...
+   \end{proof}
+
+4. DEFINITIONS:
+   \begin{definition}\label{def:widget}
+     A \emph{widget} is a pair $(X, \tau)$ where...
+   \end{definition}
+
+   - Italicize the term being defined using \emph{}
+   - State all conditions explicitly
+   - Give examples immediately after non-trivial definitions
+
+5. PROOF STRUCTURE:
+   - Begin with proof strategy: "The proof proceeds in two steps..."
+   - Number or label key claims within proofs
+   - Use \qedhere for proofs ending in displayed equations
+   - Signal transitions: "It remains to show...", "We now verify..."
+
+6. NOTATION CONVENTIONS:
+   - Define all notation in Preliminaries
+   - Use standard notation: $\mathbb{R}$, $\mathbb{Z}$, $\mathbb{N}$
+   - Use \coloneqq or := for definitions
+   - Be consistent: one symbol = one meaning throughout
+
+7. MATHEMATICAL FORMATTING:
+   - Displayed equations for important formulas: \[ ... \]
+   - Inline math for brief expressions: $...$
+   - Use align environment for multi-line equations
+   - Number only equations that are referenced later
+
+8. REFERENCES AND CITATIONS:
+   - Cite prior results when used: "By \cite{author2024}..."
+   - Distinguish between "Theorem 3 of \cite{...}" and your own results
+   - Include both classic references and recent work
+
+9. EXAMPLES AND COUNTEREXAMPLES:
+   - Illustrate each major result with a concrete example
+   - Show tightness: counterexamples demonstrating necessity of hypotheses
+   - Use \begin{example} ... \end{example} environment
+
+10. FIGURES (if applicable):
+    - Diagrams for geometric arguments
+    - Graphs or plots from computational verification
+    - Commutative diagrams for algebraic results
+    - Use TikZ or include pre-generated figures
+
+════════════════════════════════════════════════════════════════════════════════
+                          WORKFLOW: REVIEW AND REFLECT
+════════════════════════════════════════════════════════════════════════════════
+
+Before calling finish, you MUST complete these review steps:
+
+1. REVIEW RESOURCES (at the start):
+   - Read .claude/skills/paper-writer/SKILL.md for detailed guidance
+   - Study templates/paper_writing/lab_style_guide.md for style conventions
+   - Skim paper_draft/example_paper.tex for amsart LaTeX conventions only
+   - Browse paper_examples/ for language patterns (if available)
+
+2. SELF-REFLECTION (before finishing):
+   After writing all sections, review your work against these criteria:
+
+   MATHEMATICAL CONTENT CHECK:
+   - [ ] Every theorem has a complete, rigorous proof
+   - [ ] All definitions are precise with explicit quantifiers
+   - [ ] Examples illustrate major results
+   - [ ] Counterexamples show necessity of hypotheses where applicable
+   - [ ] Notation is consistent throughout
+
+   FORMATTING CHECK:
+   - [ ] Theorem environments (\begin{theorem}...\end{theorem}) used properly
+   - [ ] Proof environments (\begin{proof}...\end{proof}) used for all proofs
+   - [ ] Is hyperref package included for clickable references?
+   - [ ] Labels and cross-references work correctly
+   - [ ] Bibliography entries are complete
+
+   STRUCTURE CHECK:
+   - [ ] Introduction previews main results clearly
+   - [ ] Preliminaries section makes the paper self-contained
+   - [ ] Results are ordered logically (lemmas before theorems that use them)
+   - [ ] Does the paper compile without errors?
+
+3. FIX ISSUES:
+   - Address any issues found in the self-reflection
+   - Re-compile and verify the PDF looks correct
+
+Only after completing this review should you consider the paper finished.

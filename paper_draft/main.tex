@@ -1,0 +1,85 @@
+\documentclass{amsart}
+
+%% Standard packages
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[hidelinks]{hyperref}
+\usepackage{graphicx}
+\usepackage[shortlabels]{enumitem}
+\usepackage{booktabs}
+
+%% Theorem environments (amsart style, numbered within section)
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{algorithm-desc}[theorem]{Algorithm}
+
+\numberwithin{equation}{section}
+
+%% Import command files
+\InputIfFileExists{commands/math}{}{}
+\InputIfFileExists{commands/general}{}{}
+\InputIfFileExists{commands/macros}{}{}
+
+%% Project-specific macros
+\newcommand{\ie}{i.e.,\xspace}
+\newcommand{\eg}{e.g.,\xspace}
+\newcommand{\wrt}{w.r.t.\xspace}
+\newcommand{\NF}{\mathrm{NF}}
+\newcommand{\vars}{\operatorname{vars}}
+\newcommand{\eval}{\mathrm{eval}}
+\newcommand{\pthree}{\textsc{predictor3}\xspace}
+\newcommand{\pfour}{\textsc{predictor4}\xspace}
+\newcommand{\etp}{\textsc{etp}\xspace}
+
+%% Algorithm label counter (since we don't use the algorithm package)
+\newcounter{algcounter}
+\renewcommand{\thealgcounter}{\arabic{algcounter}}
+\newcommand{\alglabel}[1]{\refstepcounter{algcounter}\label{#1}}
+
+%%-----------------------------------------------------------------------------
+%% Document metadata
+%%-----------------------------------------------------------------------------
+\title[Equational Implication over Magmas]{Sound Decision Procedures for
+  Equational Implication over Magmas:\\
+  Knuth-Bendix Completion and SMT Model Finding}
+
+\author{Andrew Ren and NeuriCo}
+
+\subjclass[2020]{Primary 08A70, 03B35; Secondary 68Q42, 03C13}
+
+\keywords{equational implication, magmas, Knuth-Bendix completion,
+  term rewriting, SMT solving, soundness invariant}
+
+\date{\today}
+
+\begin{document}
+
+\begin{abstract}
+\input{sections/abstract}
+\end{abstract}
+
+\maketitle
+
+\tableofcontents
+
+\input{sections/introduction}
+\input{sections/preliminaries}
+\input{sections/main_results}
+\input{sections/classifier}
+\input{sections/experiments}
+\input{sections/discussion}
+\input{sections/conclusion}
+
+\bibliographystyle{amsplain}
+\bibliography{references}
+
+\end{document}

@@ -1,0 +1,1002 @@
+[
+  {
+    "law1": "x = ((y * z) * (y * x)) * x",
+    "law2": "x = (x * (y * z)) * (y * y)",
+    "is_impl": false
+  },
+  {
+    "law1": "x = ((y * z) * y) * (w * z)",
+    "law2": "x = (y * (x * x)) * x",
+    "is_impl": true
+  },
+  {
+    "law1": "x * x = y * (z * (z * w))",
+    "law2": "x * (y * x) = z * (x * w)",
+    "is_impl": false
+  },
+  {
+    "law1": "x * y = (y * x) * (x * z)",
+    "law2": "x * y = (z * w) * (u * x)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = y * (((z * w) * w) * w)",
+    "law2": "x * (y * z) = (y * x) * y",
+    "is_impl": true
+  },
+  {
+    "law1": "x * y = (y * (z * z)) * z",
+    "law2": "x = (y * (z * (z * y))) * x",
+    "is_impl": false
+  },
+  {
+    "law1": "x = ((x * y) * y) * (z * z)",
+    "law2": "x = y * (z * (z * (y * w)))",
+    "is_impl": false
+  },
+  {
+    "law1": "x = ((y * y) * (z * w)) * z",
+    "law2": "x * y = (z * (x * z)) * x",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (y * ((x * z) * z)) * z",
+    "law2": "x = ((y * (z * w)) * u) * y",
+    "is_impl": true
+  },
+  {
+    "law1": "x = y * ((z * y) * (w * z))",
+    "law2": "x * y = (z * (w * z)) * z",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (y * z) * (w * (u * x))",
+    "law2": "x = ((y * z) * (x * w)) * z",
+    "is_impl": false
+  },
+  {
+    "law1": "x * x = (x * x) * (x * x)",
+    "law2": "x = y * (x * (x * (y * x)))",
+    "is_impl": false
+  },
+  {
+    "law1": "x * y = (z * (x * z)) * w",
+    "law2": "x * (y * x) = y * (z * z)",
+    "is_impl": true
+  },
+  {
+    "law1": "x * y = z * ((w * w) * w)",
+    "law2": "x * y = z * (w * (w * w))",
+    "is_impl": true
+  },
+  {
+    "law1": "x * (y * z) = (x * z) * w",
+    "law2": "x * x = (y * z) * x",
+    "is_impl": false
+  },
+  {
+    "law1": "x = y * (z * (z * (w * z)))",
+    "law2": "x = y * (x * (x * (z * w)))",
+    "is_impl": true
+  },
+  {
+    "law1": "x = y * ((y * z) * (w * w))",
+    "law2": "x = ((y * x) * (x * z)) * y",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (x * (x * x)) * (y * y)",
+    "law2": "x = ((x * x) * (y * z)) * y",
+    "is_impl": false
+  },
+  {
+    "law1": "x = ((x * (y * y)) * z) * y",
+    "law2": "x = x * ((y * (y * z)) * w)",
+    "is_impl": false
+  },
+  {
+    "law1": "x = y * ((z * (y * x)) * z)",
+    "law2": "x * y = (z * (z * y)) * w",
+    "is_impl": false
+  },
+  {
+    "law1": "x = ((y * x) * (y * y)) * y",
+    "law2": "x * y = (y * (z * x)) * z",
+    "is_impl": false
+  },
+  {
+    "law1": "x * y = (z * (x * x)) * z",
+    "law2": "x * x = y * ((z * x) * x)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (((y * x) * x) * x) * x",
+    "law2": "x * y = y * ((z * x) * x)",
+    "is_impl": false
+  },
+  {
+    "law1": "x = ((x * (x * x)) * y) * x",
+    "law2": "x * (x * y) = (y * z) * x",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (y * y) * (z * (y * w))",
+    "law2": "x = (x * (y * z)) * (w * z)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = x * ((x * (y * y)) * y)",
+    "law2": "x * y = (z * y) * (z * w)",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (x * (x * (x * y))) * y",
+    "law2": "x = y * (((z * x) * w) * z)",
+    "is_impl": false
+  },
+  {
+    "law1": "x = ((y * y) * z) * (x * y)",
+    "law2": "x = y * ((y * z) * w)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = x * ((y * z) * (y * y))",
+    "law2": "x * y = z * ((y * w) * z)",
+    "is_impl": false
+  },
+  {
+    "law1": "(x * y) * x = (z * y) * y",
+    "law2": "x * y = z * (x * (y * y))",
+    "is_impl": false
+  },
+  {
+    "law1": "x = ((y * (x * z)) * w) * w",
+    "law2": "x * y = (z * (w * w)) * y",
+    "is_impl": true
+  },
+  {
+    "law1": "x = x * ((y * (z * y)) * x)",
+    "law2": "x = (y * (z * x)) * y",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (y * x) * (y * (z * w))",
+    "law2": "x = (y * z) * ((y * y) * z)",
+    "is_impl": true
+  },
+  {
+    "law1": "x * y = (y * z) * z",
+    "law2": "x = y * ((z * (x * y)) * y)",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (x * (y * y)) * (x * y)",
+    "law2": "x * y = (z * y) * w",
+    "is_impl": false
+  },
+  {
+    "law1": "x = ((x * (y * y)) * y) * x",
+    "law2": "x = ((y * x) * z) * (y * y)",
+    "is_impl": false
+  },
+  {
+    "law1": "x * (y * z) = (w * u) * y",
+    "law2": "x = (x * ((y * z) * x)) * z",
+    "is_impl": false
+  },
+  {
+    "law1": "x * (x * y) = y * (x * y)",
+    "law2": "x = y * ((z * z) * (x * y))",
+    "is_impl": false
+  },
+  {
+    "law1": "x = ((y * x) * (z * w)) * w",
+    "law2": "x * y = (z * y) * (y * w)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = ((y * z) * (w * z)) * z",
+    "law2": "x = y * (z * ((z * z) * z))",
+    "is_impl": true
+  },
+  {
+    "law1": "x = y * (z * ((y * z) * x))",
+    "law2": "x * (y * z) = (z * w) * u",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (y * z) * (y * (x * y))",
+    "law2": "x = (y * (x * x)) * (y * x)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (((y * x) * y) * y) * x",
+    "law2": "x * y = z * (x * (x * w))",
+    "is_impl": false
+  },
+  {
+    "law1": "x = y * (z * ((z * z) * z))",
+    "law2": "x = y * (z * (y * (w * y)))",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (x * (x * (y * y))) * z",
+    "law2": "x * y = x * ((z * z) * w)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = y * ((x * (z * w)) * u)",
+    "law2": "x * y = (x * x) * (y * x)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = ((y * z) * w) * y",
+    "law2": "x = ((y * y) * x) * (z * z)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = ((y * z) * z) * (w * y)",
+    "law2": "x = (y * y) * ((z * x) * z)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (y * z) * ((z * z) * w)",
+    "law2": "x = (x * ((y * x) * z)) * w",
+    "is_impl": true
+  },
+  {
+    "law1": "x = x * ((x * (y * z)) * x)",
+    "law2": "x = y * (((z * w) * y) * z)",
+    "is_impl": false
+  },
+  {
+    "law1": "x = y * (z * ((z * x) * x))",
+    "law2": "x * y = (z * (y * w)) * z",
+    "is_impl": false
+  },
+  {
+    "law1": "x * y = x * ((z * z) * z)",
+    "law2": "x = y * ((x * (y * y)) * x)",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (y * (y * y)) * (x * x)",
+    "law2": "x * y = (y * (z * x)) * z",
+    "is_impl": false
+  },
+  {
+    "law1": "x = ((y * x) * y) * (z * y)",
+    "law2": "x = ((y * (z * y)) * x) * z",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (y * (y * x)) * (z * y)",
+    "law2": "x = (y * y) * (z * (z * y))",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (x * (x * x)) * (y * x)",
+    "law2": "x * y = (z * w) * (w * x)",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (y * z) * (w * (y * w))",
+    "law2": "x = y * ((z * w) * (x * w))",
+    "is_impl": true
+  },
+  {
+    "law1": "x * x = y * ((z * w) * u)",
+    "law2": "(x * x) * x = (y * y) * x",
+    "is_impl": true
+  },
+  {
+    "law1": "x = ((y * z) * w) * (y * u)",
+    "law2": "x = ((y * (z * y)) * x) * y",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (((y * z) * w) * u) * x",
+    "law2": "x = (x * (x * (y * z))) * z",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (x * y) * ((y * z) * z)",
+    "law2": "x * (y * z) = (x * w) * w",
+    "is_impl": false
+  },
+  {
+    "law1": "x = x * ((y * z) * (w * z))",
+    "law2": "x = (x * y) * (z * y)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = y * (x * ((z * y) * x))",
+    "law2": "x * (x * y) = (y * x) * z",
+    "is_impl": false
+  },
+  {
+    "law1": "x * y = (z * (w * y)) * u",
+    "law2": "x * y = x * (y * (y * y))",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (((y * x) * z) * x) * y",
+    "law2": "x = y * (z * (w * u))",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (((y * x) * z) * x) * z",
+    "law2": "x = (x * (y * x)) * (x * z)",
+    "is_impl": true
+  },
+  {
+    "law1": "x * y = (x * y) * (y * y)",
+    "law2": "x = ((x * (y * y)) * y) * z",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (y * (z * x)) * (w * x)",
+    "law2": "x = (y * z) * ((x * z) * z)",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (((y * z) * w) * y) * y",
+    "law2": "x * x = (x * y) * (y * x)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = ((y * z) * (x * w)) * y",
+    "law2": "x = (((x * x) * y) * x) * x",
+    "is_impl": true
+  },
+  {
+    "law1": "x = y * (z * ((x * z) * z))",
+    "law2": "x = y * ((y * (x * z)) * z)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (x * y) * (z * (x * z))",
+    "law2": "x = (y * (z * y)) * (z * x)",
+    "is_impl": false
+  },
+  {
+    "law1": "x * y = x * (x * (z * y))",
+    "law2": "x = y * (((y * z) * z) * w)",
+    "is_impl": false
+  },
+  {
+    "law1": "x * x = ((y * x) * z) * x",
+    "law2": "x * y = y * (x * y)",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (y * x) * (z * (z * z))",
+    "law2": "x * y = (z * (w * u)) * z",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (y * (z * x)) * (y * x)",
+    "law2": "x = y * ((y * (y * y)) * x)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (y * (z * (w * z))) * w",
+    "law2": "x = (((y * z) * y) * x) * w",
+    "is_impl": true
+  },
+  {
+    "law1": "x = x * (x * ((y * z) * y))",
+    "law2": "x = ((y * z) * (w * y)) * u",
+    "is_impl": false
+  },
+  {
+    "law1": "x = ((y * y) * y) * (z * z)",
+    "law2": "x = y * ((y * z) * (y * w))",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (y * y) * ((y * y) * x)",
+    "law2": "x = y * ((y * (x * x)) * y)",
+    "is_impl": false
+  },
+  {
+    "law1": "x * x = x * ((y * y) * x)",
+    "law2": "x * y = (z * w) * w",
+    "is_impl": false
+  },
+  {
+    "law1": "x * y = z * ((x * w) * y)",
+    "law2": "x = (x * ((x * y) * x)) * y",
+    "is_impl": false
+  },
+  {
+    "law1": "x * y = (y * y) * z",
+    "law2": "x * y = (y * x) * (y * y)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = ((y * x) * z) * (z * w)",
+    "law2": "x * y = y * (y * (x * x))",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (y * z) * ((y * y) * y)",
+    "law2": "x * y = (z * z) * (w * z)",
+    "is_impl": true
+  },
+  {
+    "law1": "x * x = (y * (x * y)) * z",
+    "law2": "x * (x * x) = (y * y) * y",
+    "is_impl": false
+  },
+  {
+    "law1": "x * y = y * ((z * z) * x)",
+    "law2": "x * y = ((x * z) * w) * x",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (y * z) * (y * (w * y))",
+    "law2": "x = ((y * x) * (z * x)) * w",
+    "is_impl": true
+  },
+  {
+    "law1": "x = x * ((y * x) * (y * y))",
+    "law2": "x = x * (x * (y * x))",
+    "is_impl": false
+  },
+  {
+    "law1": "x * y = (z * (x * x)) * y",
+    "law2": "x = y * (z * ((z * x) * x))",
+    "is_impl": false
+  },
+  {
+    "law1": "x = x * ((y * (y * x)) * x)",
+    "law2": "x * x = y * (z * x)",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (y * (z * w)) * (u * x)",
+    "law2": "x = ((y * z) * (w * u)) * x",
+    "is_impl": false
+  },
+  {
+    "law1": "x = x * (x * (x * y))",
+    "law2": "x = ((y * z) * w) * (w * w)",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (x * (y * (x * x))) * x",
+    "law2": "x = ((y * (z * x)) * x) * x",
+    "is_impl": false
+  },
+  {
+    "law1": "x * x = ((y * x) * z) * x",
+    "law2": "x * y = (z * w) * (u * w)",
+    "is_impl": false
+  },
+  {
+    "law1": "x * y = y * ((z * x) * w)",
+    "law2": "x * (y * x) = (x * z) * z",
+    "is_impl": true
+  },
+  {
+    "law1": "x * x = (y * (y * z)) * z",
+    "law2": "x * y = z * (y * y)",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (((x * x) * y) * z) * w",
+    "law2": "x * y = x * (z * (w * z))",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (y * y) * ((z * w) * w)",
+    "law2": "x = (x * (x * (x * y))) * x",
+    "is_impl": true
+  },
+  {
+    "law1": "x * y = z * ((w * x) * u)",
+    "law2": "x * y = x * (x * (z * w))",
+    "is_impl": true
+  },
+  {
+    "law1": "x * y = x * (x * (y * z))",
+    "law2": "x = (x * (y * (y * x))) * y",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (y * y) * (y * (x * z))",
+    "law2": "x * (x * y) = y * (z * x)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = ((y * y) * z) * (y * w)",
+    "law2": "x = (y * (z * w)) * (z * y)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (y * y) * ((x * z) * z)",
+    "law2": "x * x = (x * (y * x)) * x",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (((y * z) * w) * y) * z",
+    "law2": "x = y * (((y * y) * z) * x)",
+    "is_impl": true
+  },
+  {
+    "law1": "(x * x) * x = (x * y) * z",
+    "law2": "x * x = ((y * z) * y) * w",
+    "is_impl": false
+  },
+  {
+    "law1": "x * y = z * ((x * x) * y)",
+    "law2": "x * y = ((z * w) * w) * w",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (x * (x * y)) * (y * y)",
+    "law2": "x = ((y * (x * z)) * w) * y",
+    "is_impl": false
+  },
+  {
+    "law1": "x = ((y * (z * w)) * z) * u",
+    "law2": "x * (y * z) = (w * z) * y",
+    "is_impl": true
+  },
+  {
+    "law1": "x = ((y * (x * z)) * y) * x",
+    "law2": "x = ((y * z) * w) * (u * x)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = ((y * z) * (z * w)) * u",
+    "law2": "x * y = (z * w) * (u * y)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (((y * x) * y) * x) * y",
+    "law2": "x = y * (((z * y) * w) * u)",
+    "is_impl": false
+  },
+  {
+    "law1": "x = y * ((x * y) * (z * z))",
+    "law2": "x = (x * (x * y)) * (z * w)",
+    "is_impl": false
+  },
+  {
+    "law1": "x * y = x * (x * (y * y))",
+    "law2": "x = ((x * (x * y)) * z) * z",
+    "is_impl": false
+  },
+  {
+    "law1": "x = ((y * z) * w) * (z * w)",
+    "law2": "x = (y * (x * z)) * (w * w)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (y * (x * (x * z))) * y",
+    "law2": "x = y * ((x * (y * y)) * x)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = ((x * x) * (y * z)) * z",
+    "law2": "x = (y * ((z * z) * z)) * w",
+    "is_impl": false
+  },
+  {
+    "law1": "x = y * ((z * w) * (w * u))",
+    "law2": "x = y * (z * (y * (x * y)))",
+    "is_impl": true
+  },
+  {
+    "law1": "x * y = ((z * y) * x) * w",
+    "law2": "x = y * ((x * y) * (y * x))",
+    "is_impl": false
+  },
+  {
+    "law1": "x * x = (x * x) * (y * y)",
+    "law2": "x * y = ((y * z) * y) * y",
+    "is_impl": false
+  },
+  {
+    "law1": "x * y = (x * z) * (x * x)",
+    "law2": "x = (x * (y * z)) * (x * z)",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (y * (z * (y * x))) * w",
+    "law2": "x = (y * (z * (w * x))) * w",
+    "is_impl": true
+  },
+  {
+    "law1": "x = y * ((z * z) * (z * x))",
+    "law2": "x = (x * (x * (x * y))) * z",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (y * z) * (y * (z * w))",
+    "law2": "x = y * ((y * (z * w)) * y)",
+    "is_impl": true
+  },
+  {
+    "law1": "x * y = ((z * w) * y) * u",
+    "law2": "x * y = (x * y) * (y * x)",
+    "is_impl": true
+  },
+  {
+    "law1": "x * y = (z * (w * x)) * w",
+    "law2": "x = (((y * y) * x) * x) * x",
+    "is_impl": false
+  },
+  {
+    "law1": "(x * x) * y = (z * x) * y",
+    "law2": "x = ((y * (z * x)) * w) * y",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (y * x) * (x * z)",
+    "law2": "x * y = z * ((w * z) * u)",
+    "is_impl": false
+  },
+  {
+    "law1": "x * y = z * (y * (z * x))",
+    "law2": "x * y = x * (y * (y * z))",
+    "is_impl": false
+  },
+  {
+    "law1": "x = y * (((x * y) * x) * y)",
+    "law2": "x = (x * (y * y)) * (z * z)",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (y * (z * (x * z))) * y",
+    "law2": "x = (x * y) * (y * (y * y))",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (y * x) * ((z * y) * w)",
+    "law2": "x = (y * (y * (z * w))) * w",
+    "is_impl": true
+  },
+  {
+    "law1": "x * y = z * ((w * x) * u)",
+    "law2": "x = (((y * z) * y) * x) * x",
+    "is_impl": false
+  },
+  {
+    "law1": "x * y = ((z * z) * w) * x",
+    "law2": "x * x = y * ((z * w) * w)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (y * ((z * y) * z)) * y",
+    "law2": "x = ((y * (y * z)) * w) * x",
+    "is_impl": true
+  },
+  {
+    "law1": "x = y * (((y * z) * x) * x)",
+    "law2": "x = (y * (z * w)) * (u * x)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (y * (y * x)) * y",
+    "law2": "x = ((y * y) * (x * z)) * w",
+    "is_impl": false
+  },
+  {
+    "law1": "(x * x) * x = (y * z) * w",
+    "law2": "x = ((y * (z * w)) * w) * x",
+    "is_impl": false
+  },
+  {
+    "law1": "x * x = y * (z * (x * z))",
+    "law2": "x * y = z * ((y * x) * x)",
+    "is_impl": false
+  },
+  {
+    "law1": "x = x * (((x * x) * y) * y)",
+    "law2": "x * (y * x) = z * (w * u)",
+    "is_impl": false
+  },
+  {
+    "law1": "x * y = ((y * z) * z) * y",
+    "law2": "x = y * (y * ((x * x) * x))",
+    "is_impl": false
+  },
+  {
+    "law1": "x = ((x * y) * y) * (y * x)",
+    "law2": "x = y * (y * ((y * y) * z))",
+    "is_impl": false
+  },
+  {
+    "law1": "x * (y * x) = (y * x) * x",
+    "law2": "x = (y * ((y * z) * w)) * w",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (y * z) * (y * (w * x))",
+    "law2": "x = (y * ((y * y) * x)) * y",
+    "is_impl": false
+  },
+  {
+    "law1": "x = y * (y * ((x * z) * w))",
+    "law2": "x = (((x * y) * z) * z) * z",
+    "is_impl": true
+  },
+  {
+    "law1": "x * y = ((x * z) * z) * y",
+    "law2": "x = (y * ((y * x) * z)) * x",
+    "is_impl": false
+  },
+  {
+    "law1": "x = y * (((z * z) * w) * w)",
+    "law2": "x * y = y * ((y * z) * w)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = y * (x * (z * y))",
+    "law2": "x * y = y * ((x * y) * z)",
+    "is_impl": true
+  },
+  {
+    "law1": "x * y = z * (y * (z * y))",
+    "law2": "x = x * (((y * y) * z) * x)",
+    "is_impl": false
+  },
+  {
+    "law1": "x = y * ((z * (z * y)) * w)",
+    "law2": "x * y = (x * (z * y)) * z",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (y * y) * (z * (y * y))",
+    "law2": "x = (((y * z) * x) * y) * y",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (y * (x * y)) * (y * z)",
+    "law2": "x = (y * ((y * x) * z)) * z",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (y * z) * ((w * z) * w)",
+    "law2": "x = y * (((y * x) * z) * z)",
+    "is_impl": true
+  },
+  {
+    "law1": "x * y = z * ((w * y) * z)",
+    "law2": "x * x = ((y * y) * y) * x",
+    "is_impl": true
+  },
+  {
+    "law1": "x = y * (z * y)",
+    "law2": "x * x = x * (y * (z * x))",
+    "is_impl": true
+  },
+  {
+    "law1": "x * y = x * ((z * y) * y)",
+    "law2": "x = x * (((y * z) * z) * y)",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (y * (x * (z * z))) * y",
+    "law2": "x = (y * (x * z)) * (w * z)",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (y * (x * y)) * (y * y)",
+    "law2": "x = (((y * y) * x) * z) * w",
+    "is_impl": false
+  },
+  {
+    "law1": "x = y * (z * (x * (x * z)))",
+    "law2": "x = (y * z) * ((y * x) * w)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = y * ((x * (y * x)) * z)",
+    "law2": "x * x = x * ((y * y) * y)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = y * (z * (w * (u * y)))",
+    "law2": "x * y = y * ((z * y) * y)",
+    "is_impl": true
+  },
+  {
+    "law1": "x * x = x * ((x * y) * y)",
+    "law2": "x = ((x * x) * y) * (y * x)",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (y * z) * (z * (y * y))",
+    "law2": "x * y = z * ((x * w) * u)",
+    "is_impl": true
+  },
+  {
+    "law1": "x * y = (z * (x * y)) * w",
+    "law2": "x = y * ((x * z) * (z * x))",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (y * (z * x)) * (w * z)",
+    "law2": "x * (y * y) = (z * x) * w",
+    "is_impl": true
+  },
+  {
+    "law1": "x * (x * x) = y * (z * z)",
+    "law2": "x = (y * x) * (x * y)",
+    "is_impl": false
+  },
+  {
+    "law1": "x * y = ((z * z) * x) * w",
+    "law2": "x * y = (z * y) * y",
+    "is_impl": true
+  },
+  {
+    "law1": "x = x * (y * ((y * z) * x))",
+    "law2": "x = y * (((z * y) * y) * z)",
+    "is_impl": false
+  },
+  {
+    "law1": "x = y * ((z * z) * (w * z))",
+    "law2": "x = ((x * y) * (z * x)) * y",
+    "is_impl": true
+  },
+  {
+    "law1": "x = y * (x * ((z * w) * u))",
+    "law2": "x = ((x * x) * (y * z)) * x",
+    "is_impl": true
+  },
+  {
+    "law1": "x = ((y * (z * x)) * w) * u",
+    "law2": "x = (y * z) * (y * w)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = y * ((z * (y * w)) * z)",
+    "law2": "x * y = x * ((x * x) * y)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = y * (z * (w * (y * u)))",
+    "law2": "x = (y * y) * (y * (z * x))",
+    "is_impl": true
+  },
+  {
+    "law1": "x * x = y * (y * y)",
+    "law2": "x * y = ((z * x) * y) * w",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (x * y) * ((z * y) * z)",
+    "law2": "x = ((y * z) * w) * (y * z)",
+    "is_impl": false
+  },
+  {
+    "law1": "x = y * ((z * (w * y)) * y)",
+    "law2": "x * y = (x * (x * y)) * y",
+    "is_impl": true
+  },
+  {
+    "law1": "x * y = (z * (x * y)) * z",
+    "law2": "x = y * (y * ((x * z) * x))",
+    "is_impl": false
+  },
+  {
+    "law1": "x = ((y * (z * y)) * z) * z",
+    "law2": "x * y = y * ((y * x) * x)",
+    "is_impl": true
+  },
+  {
+    "law1": "x = y * ((z * y) * (w * y))",
+    "law2": "x * (y * z) = (w * x) * y",
+    "is_impl": true
+  },
+  {
+    "law1": "x * y = (z * w) * (u * v)",
+    "law2": "x * y = ((z * w) * z) * u",
+    "is_impl": true
+  },
+  {
+    "law1": "x * (y * z) = (z * x) * w",
+    "law2": "x * y = y * (z * (x * y))",
+    "is_impl": false
+  },
+  {
+    "law1": "x * y = z * (y * (w * z))",
+    "law2": "x * (y * z) = (w * w) * u",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (y * x) * (z * (y * w))",
+    "law2": "x = y * (x * ((y * z) * z))",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (x * y) * (x * y)",
+    "law2": "x = (((y * z) * z) * w) * z",
+    "is_impl": false
+  },
+  {
+    "law1": "x = ((y * x) * (y * z)) * w",
+    "law2": "x = ((x * x) * (x * y)) * y",
+    "is_impl": true
+  },
+  {
+    "law1": "x * (y * x) = (z * w) * u",
+    "law2": "x = y * ((x * (z * x)) * w)",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (y * (x * (z * w))) * y",
+    "law2": "x = (y * (z * (w * u))) * v",
+    "is_impl": true
+  },
+  {
+    "law1": "x = ((y * (z * w)) * x) * y",
+    "law2": "x = (y * x) * ((z * z) * y)",
+    "is_impl": true
+  },
+  {
+    "law1": "x * y = ((z * z) * w) * x",
+    "law2": "x = y * (x * (x * z))",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (y * (x * (y * x))) * z",
+    "law2": "x = (y * ((z * z) * y)) * x",
+    "is_impl": true
+  },
+  {
+    "law1": "x = y * ((z * w) * (y * z))",
+    "law2": "x * y = y * (y * (y * x))",
+    "is_impl": true
+  },
+  {
+    "law1": "x = y * (z * ((y * w) * x))",
+    "law2": "x = ((y * (z * y)) * z) * y",
+    "is_impl": false
+  },
+  {
+    "law1": "x * y = (z * w) * (z * w)",
+    "law2": "(x * y) * y = (z * w) * y",
+    "is_impl": true
+  },
+  {
+    "law1": "x = (((y * x) * x) * x) * y",
+    "law2": "x * (y * z) = (x * z) * z",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (y * y) * (z * z)",
+    "law2": "x = y * (y * (x * (z * z)))",
+    "is_impl": true
+  },
+  {
+    "law1": "x * x = (y * y) * (x * z)",
+    "law2": "x * y = (z * x) * y",
+    "is_impl": false
+  },
+  {
+    "law1": "x * (x * y) = z * (w * z)",
+    "law2": "x * x = (x * y) * z",
+    "is_impl": false
+  },
+  {
+    "law1": "x = (y * (z * (y * z))) * y",
+    "law2": "x = ((y * x) * (y * x)) * x",
+    "is_impl": true
+  },
+  {
+    "law1": "x = y * (y * ((y * z) * z))",
+    "law2": "x = (y * (x * z)) * (w * x)",
+    "is_impl": true
+  },
+  {
+    "law1": "x * y = (y * y) * z",
+    "law2": "x * y = x * ((z * x) * x)",
+    "is_impl": true
+  }
+]
